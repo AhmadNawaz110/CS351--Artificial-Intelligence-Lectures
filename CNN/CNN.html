@@ -1,0 +1,1871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNN Lecture: Complete Solved Example</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .slide {
+            display: none;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .slide.active {
+            display: flex;
+        }
+        .math-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        .math-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+        .convolution-grid {
+            display: grid;
+            gap: 2px;
+            margin: 20px auto;
+        }
+        .grid-cell {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e0e7ff;
+            border: 2px solid #6366f1;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        .grid-cell.highlight {
+            background: #fbbf24;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.8);
+        }
+        .grid-cell.kernel {
+            background: #f87171;
+            color: white;
+        }
+        .grid-cell.current {
+            background: #34d399;
+            color: white;
+            animation: pulse 0.5s ease-in-out;
+        }
+        .formula {
+            font-family: 'Times New Roman', serif;
+            font-size: 1.1em;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .step-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .nav-button {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 15px 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .nav-button:hover {
+            background: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+        .nav-button.prev {
+            left: 20px;
+        }
+        .nav-button.next {
+            right: 20px;
+        }
+        .toc-item {
+            cursor: pointer;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .toc-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(10px);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        .calculation-step {
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 5px 0;
+            font-family: monospace;
+            transition: all 0.3s ease;
+        }
+        .calculation-step.active {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            transform: translateX(5px);
+        }
+        .multiplication-display {
+            display: grid;
+            grid-template-columns: 50px 20px 50px 20px 50px;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .multiplication-cell {
+            text-align: center;
+            font-weight: bold;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .running-sum {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        .example-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .flow-step {
+            background: white;
+            border: 2px solid #6366f1;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            min-width: 120px;
+        }
+        .flow-arrow {
+            color: #6366f1;
+            font-size: 24px;
+        }
+        .step-detail {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #6366f1;
+        }
+        .step-number {
+            background: #6366f1;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .calculation-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .calculation-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation -->
+    <button class="nav-button prev" onclick="previousSlide()">
+        <i class="fas fa-chevron-left text-2xl text-purple-600"></i>
+    </button>
+    <button class="nav-button next" onclick="nextSlide()">
+        <i class="fas fa-chevron-right text-2xl text-purple-600"></i>
+    </button>
+
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+        <span id="currentStep">1</span> / <span id="totalSteps">13</span>
+    </div>
+
+    <!-- Slide 1: Title -->
+    <div class="slide active" id="slide1">
+        <div class="container mx-auto px-8 py-16 flex flex-col items-center justify-center text-white">
+            <h1 class="text-6xl font-bold mb-6 text-center pulse">Convolutional Neural Networks</h1>
+            <h2 class="text-3xl mb-8 text-center">Complete Mathematical Breakdown</h2>
+            <div class="flex gap-8 mt-12">
+                <div class="math-box text-center">
+                    <i class="fas fa-calculator text-5xl text-purple-600 mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-800">Step-by-Step Math</h3>
+                </div>
+                <div class="math-box text-center">
+                    <i class="fas fa-chart-line text-5xl text-purple-600 mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-800">Detailed Calculations</h3>
+                </div>
+                <div class="math-box text-center">
+                    <i class="fas fa-brain text-5xl text-purple-600 mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-800">Deep Understanding</h3>
+                </div>
+            </div>
+            <p class="mt-12 text-xl text-center max-w-3xl">
+                Master CNN mathematics through detailed visualizations and comprehensive calculations
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 2: Table of Contents -->
+    <div class="slide" id="slide2">
+        <div class="container mx-auto px-8 py-16">
+            <h1 class="text-5xl font-bold text-white mb-8 text-center">Course Outline</h1>
+            <div class="grid grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="math-box">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Part 1: Foundations</h2>
+                    <div class="toc-item" onclick="goToSlide(3)">
+                        <i class="fas fa-play-circle mr-2"></i> CNN Architecture Overview
+                    </div>
+                    <div class="toc-item" onclick="goToSlide(4)">
+                        <i class="fas fa-play-circle mr-2"></i> Mathematical Foundations
+                    </div>
+                    <div class="toc-item" onclick="goToSlide(5)">
+                        <i class="fas fa-play-circle mr-2"></i> Convolution Operation Basics
+                    </div>
+                </div>
+                <div class="math-box">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Part 2: Detailed Mathematics</h2>
+                    <div class="toc-item" onclick="goToSlide(6)">
+                        <i class="fas fa-play-circle mr-2"></i> Complete Convolution Calculation
+                    </div>
+                    <div class="toc-item" onclick="goToSlide(7)">
+                        <i class="fas fa-play-circle mr-2"></i> Complete Solved Example
+                    </div>
+                    <div class="toc-item" onclick="goToSlide(8)">
+                        <i class="fas fa-play-circle mr-2"></i> Pooling Operations Math
+                    </div>
+                </div>
+                <div class="math-box">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Part 3: Advanced Topics</h2>
+                    <div class="toc-item" onclick="goToSlide(9)">
+                        <i class="fas fa-play-circle mr-2"></i> Activation Functions Math
+                    </div>
+                    <div class="toc-item" onclick="goToSlide(10)">
+                        <i class="fas fa-play-circle mr-2"></i> Gradient Calculations
+                    </div>
+                    <div class="toc-item" onclick="goToSlide(11)">
+                        <i class="fas fa-play-circle mr-2"></i> Optimization Mathematics
+                    </div>
+                </div>
+                <div class="math-box">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Part 4: Applications</h2>
+                    <div class="toc-item" onclick="goToSlide(12)">
+                        <i class="fas fa-play-circle mr-2"></i> Real-world Implementations
+                    </div>
+                    <div class="toc-item" onclick="goToSlide(13)">
+                        <i class="fas fa-play-circle mr-2"></i> Performance Analysis
+                    </div>
+                    <div class="toc-item">
+                        <i class="fas fa-play-circle mr-2"></i> Future Directions
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: CNN Architecture Overview -->
+    <div class="slide" id="slide3">
+        <div class="container mx-auto px-8 py-16">
+            <h1 class="text-5xl font-bold text-white mb-8 text-center">CNN Architecture Overview</h1>
+            <div class="max-w-6xl mx-auto">
+                <div class="math-box mb-8">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Mathematical Representation</h2>
+                    <div class="formula">
+                        CNN = {C<sub>1</sub>, P<sub>1</sub>, C<sub>2</sub>, P<sub>2</sub>, ..., FC<sub>1</sub>, FC<sub>2</sub>, Output}
+                    </div>
+                    <p class="text-center text-gray-600 mt-2">
+                        Where C = Convolutional Layer, P = Pooling Layer, FC = Fully Connected Layer
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="math-box">
+                        <h3 class="text-xl font-bold text-purple-600 mb-4">Input Layer</h3>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="font-semibold text-blue-800 mb-2">Mathematical Form:</p>
+                            <p class="formula">I ∈ ℝ<sup>H×W×C</sup></p>
+                            <ul class="mt-3 text-sm space-y-1">
+                                <li><strong>H:</strong> Height</li>
+                                <li><strong>W:</strong> Width</li>
+                                <li><strong>C:</strong> Channels (3 for RGB)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="math-box">
+                        <h3 class="text-xl font-bold text-purple-600 mb-4">Convolutional Layer</h3>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <p class="font-semibold text-green-800 mb-2">Operation:</p>
+                            <p class="formula">Y = I * K + b</p>
+                            <ul class="mt-3 text-sm space-y-1">
+                                <li><strong>*:</strong> Convolution operation</li>
+                                <li><strong>K:</strong> Kernel/filter</li>
+                                <li><strong>b:</strong> Bias term</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="math-box">
+                        <h3 class="text-xl font-bold text-purple-600 mb-4">Output Layer</h3>
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <p class="font-semibold text-red-800 mb-2">Classification:</p>
+                            <p class="formula">P = softmax(W<sub>out</sub> · h + b<sub>out</sub>)</p>
+                            <ul class="mt-3 text-sm space-y-1">
+                                <li><strong>P:</strong> Probability distribution</li>
+                                <li><strong>h:</strong> Final hidden state</li>
+                                <li><strong>softmax:</strong> Normalization</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box mt-8">
+                    <h3 class="text-xl font-bold text-purple-600 mb-4">Layer-wise Mathematical Operations</h3>
+                    <div class="space-y-4">
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-purple-800 mb-2">1. Convolution Operation</h4>
+                            <p class="formula">Y<sub>c</sub>[i,j] = ∑<sub>m=0</sub><sup>M-1</sup> ∑<sub>n=0</sub><sup>N-1</sup> ∑<sub k=0</sub><sup>K-1</sup> I[i+m, j+n, k] · K[m, n, k, c] + b[c]</p>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-yellow-800 mb-2">2. Activation Function</h4>
+                            <p class="formula">A = σ(Y) where σ(x) = max(0, x) for ReLU</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-green-800 mb-2">3. Pooling Operation</h4>
+                            <p class="formula">P[i,j] = max{ A[i·s:i·s+k, j·s:j·s+k] } for max pooling</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-blue-800 mb-2">4. Fully Connected Layer</h4>
+                            <p class="formula">h = W · vec(P) + b</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Mathematical Foundations -->
+    <div class="slide" id="slide4">
+        <div class="container mx-auto px-8 py-16">
+            <h1 class="text-5xl font-bold text-white mb-8 text-center">Mathematical Foundations</h1>
+            <div class="max-w-6xl mx-auto">
+                <div class="math-box mb-8">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Core Mathematical Concepts</h2>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-blue-800 mb-2">Linear Algebra</h3>
+                            <ul class="space-y-2 text-sm">
+                                <li><strong>Matrix Multiplication:</strong> C = A · B</li>
+                                <li><strong>Element-wise:</strong> C[i,j] = ∑<sub>k</sub> A[i,k] · B[k,j]</li>
+                                <li><strong>Convolution as Matrix:</strong> Y = I · K<sub>toeplitz</sub></li>
+                            </ul>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-green-800 mb-2">Calculus</h3>
+                            <ul class="space-y-2 text-sm">
+                                <li><strong>Partial Derivatives:</strong> ∂f/∂x</li>
+                                <li><strong>Chain Rule:</strong> ∂f/∂x = (∂f/∂y) · (∂y/∂x)</li>
+                                <li><strong>Gradient Descent:</strong> θ = θ - η∇J(θ)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box mb-8">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Convolution Theorem</h2>
+                    <div class="bg-purple-50 p-6 rounded-lg">
+                        <p class="formula text-2xl mb-4">f * g = ℱ<sup>-1</sup>{ℱ{f} · ℱ{g}}</p>
+                        <p class="text-center text-gray-700">
+                            Where ℱ denotes the Fourier transform and * denotes convolution
+                        </p>
+                        <div class="mt-4 grid grid-cols-3 gap-4 text-sm">
+                            <div class="bg-white p-3 rounded">
+                                <p class="font-semibold">Spatial Domain</p>
+                                <p>Direct convolution</p>
+                            </div>
+                            <div class="bg-white p-3 rounded">
+                                <p class="font-semibold">Frequency Domain</p>
+                                <p>Point-wise multiplication</p>
+                            </div>
+                            <div class="bg-white p-3 rounded">
+                                <p class="font-semibold">Computational</p>
+                                <p>O(n²) vs O(n log n)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Mathematical Properties</h2>
+                    <div class="space-y-4">
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-yellow-800 mb-2">1. Commutativity</h3>
+                            <p class="formula">f * g = g * f</p>
+                            <p class="text-sm text-gray-600 mt-2">The order of convolution doesn't matter</p>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-red-800 mb-2">2. Associativity</h3>
+                            <p class="formula">(f * g) * h = f * (g * h)</p>
+                            <p class="text-sm text-gray-600 mt-2">Multiple convolutions can be grouped</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-green-800 mb-2">3. Distributivity</h3>
+                            <p class="formula">f * (g + h) = f * g + f * h</p>
+                            <p class="text-sm text-gray-600 mt-2">Convolution distributes over addition</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-blue-800 mb-2">4. Linearity</h3>
+                            <p class="formula">a(f * g) = (af) * g = f * (ag)</p>
+                            <p class="text-sm text-gray-600 mt-2">Scalar multiplication can be factored out</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Convolution Operation Basics -->
+    <div class="slide" id="slide5">
+        <div class="container mx-auto px-8 py-16">
+            <h1 class="text-5xl font-bold text-white mb-8 text-center">Convolution Operation Basics</h1>
+            <div class="max-w-6xl mx-auto">
+                <div class="math-box mb-8">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Mathematical Definition</h2>
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg">
+                        <p class="formula text-2xl mb-4">
+                            (I * K)[i,j] = ∑<sub>m</sub> ∑<sub>n</sub> I[i+m, j+n] · K[m,n]
+                        </p>
+                        <div class="grid grid-cols-2 gap-6 mt-6">
+                            <div>
+                                <h3 class="font-bold text-purple-800 mb-2">Variables:</h3>
+                                <ul class="space-y-1 text-sm">
+                                    <li><strong>I:</strong> Input matrix</li>
+                                    <li><strong>K:</strong> Kernel/filter</li>
+                                    <li><strong>i,j:</strong> Output position</li>
+                                    <li><strong>m,n:</strong> Kernel indices</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-purple-800 mb-2">Parameters:</h3>
+                                <ul class="space-y-1 text-sm">
+                                    <li><strong>Kernel Size:</strong> k × k</li>
+                                    <li><strong>Stride:</strong> s (step size)</li>
+                                    <li><strong>Padding:</strong> p (border pixels)</li>
+                                    <li><strong>Dilation:</strong> d (spacing)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8">
+                    <div class="math-box">
+                        <h3 class="text-xl font-bold text-purple-600 mb-4">Output Size Calculation</h3>
+                        <div class="space-y-4">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <p class="font-semibold text-blue-800 mb-2">General Formula:</p>
+                                <p class="formula">O = ⌊(W - K + 2P)/S⌋ + 1</p>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <p class="font-semibold text-green-800 mb-2">With Dilation:</p>
+                                <p class="formula">O = ⌊(W - d(K-1) - 1 + 2P)/S⌋ + 1</p>
+                            </div>
+                            <div class="bg-yellow-50 p-4 rounded-lg">
+                                <p class="font-semibold text-yellow-800 mb-2">Example Calculation:</p>
+                                <p class="text-sm">W=32, K=3, P=1, S=1</p>
+                                <p class="text-sm">O = ⌊(32-3+2×1)/1⌋ + 1 = 32</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="math-box">
+                        <h3 class="text-xl font-bold text-purple-600 mb-4">Padding Types</h3>
+                        <div class="space-y-3">
+                            <div class="bg-red-50 p-3 rounded-lg">
+                                <h4 class="font-bold text-red-800">Valid Padding</h4>
+                                <p class="text-sm">P = 0, no padding added</p>
+                                <p class="formula">O = W - K + 1</p>
+                            </div>
+                            <div class="bg-purple-50 p-3 rounded-lg">
+                                <h4 class="font-bold text-purple-800">Same Padding</h4>
+                                <p class="text-sm">P = (K-1)/2, output size = input size</p>
+                                <p class="formula">O = W</p>
+                            </div>
+                            <div class="bg-blue-50 p-3 rounded-lg">
+                                <h4 class="font-bold text-blue-800">Full Padding</h4>
+                                <p class="text-sm">P = K-1, maximum padding</p>
+                                <p class="formula">O = W + K - 1</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box mt-8">
+                    <h3 class="text-xl font-bold text-purple-600 mb-4">Stride and Dilation Effects</h3>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg">
+                            <h4 class="font-bold text-green-800 mb-2">Stride Effects</h4>
+                            <ul class="space-y-2 text-sm">
+                                <li><strong>S=1:</strong> Dense sampling, O = W - K + 1</li>
+                                <li><strong>S=2:</strong> Downsampling, O = ⌊(W-K)/2⌋ + 1</li>
+                                <li><strong>S>1:</strong> Reduces spatial dimensions</li>
+                                <li><strong>Trade-off:</strong> Less computation, less information</li>
+                            </ul>
+                        </div>
+                        <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg">
+                            <h4 class="font-bold text-orange-800 mb-2">Dilation Effects</h4>
+                            <ul class="space-y-2 text-sm">
+                                <li><strong>d=1:</strong> Standard convolution</li>
+                                <li><strong>d=2:</strong> Every other pixel, larger receptive field</li>
+                                <li><strong>d>1:</strong> Atrous convolution</li>
+                                <li><strong>Benefit:</strong> Larger field without more parameters</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Complete Convolution Calculation -->
+    <div class="slide" id="slide6">
+        <div class="container mx-auto px-8 py-16">
+            <h1 class="text-5xl font-bold text-white mb-8 text-center">Complete Convolution Calculation</h1>
+            <div class="max-w-7xl mx-auto">
+                <div class="math-box mb-6">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Step-by-Step Convolution Example</h2>
+                    <div class="flex justify-center gap-8 mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-center mb-2">Input Matrix (5×5)</h3>
+                            <div class="convolution-grid" style="grid-template-columns: repeat(5, 50px);" id="inputGrid">
+                                <!-- Will be populated by JS -->
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-center mb-2">Kernel (3×3)</h3>
+                            <div class="convolution-grid" style="grid-template-columns: repeat(3, 50px);" id="kernelGrid">
+                                <!-- Will be populated by JS -->
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-center mb-2">Output Matrix (3×3)</h3>
+                            <div class="convolution-grid" style="grid-template-columns: repeat(3, 50px);" id="outputGrid">
+                                <!-- Will be populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button onclick="startDetailedConvolution()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition text-lg">
+                            <i class="fas fa-play mr-2"></i>Start Detailed Calculation
+                        </button>
+                    </div>
+                </div>
+
+                <div class="math-box mb-6">
+                    <h3 class="text-xl font-bold text-purple-600 mb-4">Current Position Calculation</h3>
+                    <div id="calculationDetails">
+                        <p class="text-center text-gray-500">Click "Start Detailed Calculation" to begin</p>
+                    </div>
+                </div>
+
+                <div class="math-box">
+                    <h3 class="text-xl font-bold text-purple-600 mb-4">Multiplication Steps</h3>
+                    <div id="multiplicationSteps" class="space-y-2">
+                        <p class="text-center text-gray-500">Calculation steps will appear here</p>
+                    </div>
+                    <div id="runningSum" class="running-sum mt-4" style="display: none;">
+                        Running Sum: <span id="sumValue">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Complete Solved Example -->
+    <div class="slide" id="slide7">
+        <div class="container mx-auto px-8 py-16">
+            <h1 class="text-5xl font-bold text-white mb-8 text-center">Complete Solved Example</h1>
+            <div class="max-w-7xl mx-auto">
+                <div class="math-box mb-6">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">CNN Forward Pass: Step-by-Step Calculation</h2>
+                    
+                    <div class="example-flow mb-6">
+                        <div class="flow-step">
+                            <i class="fas fa-image text-3xl text-blue-600 mb-2"></i>
+                            <p class="font-bold">Input</p>
+                            <p class="text-sm">4×4×1</p>
+                        </div>
+                        <i class="fas fa-arrow-right flow-arrow"></i>
+                        <div class="flow-step">
+                            <i class="fas fa-th text-3xl text-green-600 mb-2"></i>
+                            <p class="font-bold">Conv</p>
+                            <p class="text-sm">3×3 kernel</p>
+                        </div>
+                        <i class="fas fa-arrow-right flow-arrow"></i>
+                        <div class="flow-step">
+                            <i class="fas fa-bolt text-3xl text-yellow-600 mb-2"></i>
+                            <p class="font-bold">ReLU</p>
+                            <p class="text-sm">Activation</p>
+                        </div>
+                        <i class="fas fa-arrow-right flow-arrow"></i>
+                        <div class="flow-step">
+                            <i class="fas fa-compress text-3xl text-red-600 mb-2"></i>
+                            <p class="font-bold">Pool</p>
+                            <p class="text-sm">2×2 max</p>
+                        </div>
+                        <i class="fas fa-arrow-right flow-arrow"></i>
+                        <div class="flow-step">
+                            <i class="fas fa-project-diagram text-3xl text-purple-600 mb-2"></i>
+                            <p class="font-bold">FC</p>
+                            <p class="text-sm">4→2</p>
+                        </div>
+                        <i class="fas fa-arrow-right flow-arrow"></i>
+                        <div class="flow-step">
+                            <i class="fas fa-chart-pie text-3xl text-indigo-600 mb-2"></i>
+                            <p class="font-bold">Softmax</p>
+                            <p class="text-sm">Output</p>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-6">
+                        <button onclick="startCompleteExample()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition text-lg">
+                            <i class="fas fa-play mr-2"></i>Run Complete Example
+                        </button>
+                    </div>
+                </div>
+
+                <div id="exampleSteps" class="space-y-4">
+                    <!-- Steps will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Pooling Operations Math -->
+    <div class="slide" id="slide8">
+        <div class="container mx-auto px-8 py-16">
+            <h1 class="text-5xl font-bold text-white mb-8 text-center">Pooling Operations Mathematics</h1>
+            <div class="max-w-6xl mx-auto">
+                <div class="math-box mb-8">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Mathematical Definitions</h2>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-blue-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-blue-800 mb-4">Max Pooling</h3>
+                            <p class="formula mb-4">y<sub>i,j</sub> = max{ x<sub>m,n</sub> | (m,n) ∈ R<sub>i,j</sub> }</p>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold text-sm">Where:</p>
+                                    <ul class="text-sm space-y-1">
+                                        <li><strong>R<sub>i,j</sub>:</strong> Region at position (i,j)</li>
+                                        <li><strong>x<sub>m,n</sub>:</strong> Input values in region</li>
+                                        <li><strong>y<sub>i,j</sub>:</strong> Output value</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-blue-100 p-3 rounded">
+                                    <p class="font-semibold text-sm">Gradient:</p>
+                                    <p class="formula text-sm">∂L/∂x<sub>m,n</sub> = { ∂L/∂y<sub>i,j</sub> if x<sub>m,n</sub> = max, 0 otherwise }</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-green-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-green-800 mb-4">Average Pooling</h3>
+                            <p class="formula mb-4">y<sub>i,j</sub> = (1/|R<sub>i,j</sub>|) ∑<sub>(m,n)∈R<sub>i,j</sub></sub> x<sub>m,n</sub></p>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold text-sm">Where:</p>
+                                    <ul class="text-sm space-y-1">
+                                        <li><strong>|R<sub>i,j</sub>|:</strong> Number of elements in region</li>
+                                        <li><strong>∑:</strong> Sum over all elements</li>
+                                        <li><strong>y<sub>i,j</sub>:</strong> Average value</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-green-100 p-3 rounded">
+                                    <p class="font-semibold text-sm">Gradient:</p>
+                                    <p class="formula text-sm">∂L/∂x<sub>m,n</sub> = (1/|R<sub>i,j</sub>|) ∂L/∂y<sub>i,j</sub></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box mb-8">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Detailed Calculation Example</h2>
+                    <div class="bg-purple-50 p-6 rounded-lg">
+                        <h3 class="font-bold text-purple-800 mb-4">Input Region (2×2):</h3>
+                        <div class="flex justify-center gap-8 mb-6">
+                            <div>
+                                <div class="grid grid-cols-2 gap-2 text-center mb-2">
+                                    <div class="bg-white p-4 rounded font-bold">4</div>
+                                    <div class="bg-white p-4 rounded font-bold">2</div>
+                                    <div class="bg-white p-4 rounded font-bold">8</div>
+                                    <div class="bg-white p-4 rounded font-bold">6</div>
+                                </div>
+                                <p class="text-center text-sm">Input Values</p>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-arrow-right text-3xl text-purple-600"></i>
+                            </div>
+                            <div>
+                                <div class="bg-yellow-100 p-4 rounded text-center font-bold text-2xl mb-2">8</div>
+                                <p class="text-center text-sm">Max Pooling</p>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-arrow-right text-3xl text-purple-600"></i>
+                            </div>
+                            <div>
+                                <div class="bg-green-100 p-4 rounded text-center font-bold text-2xl mb-2">5</div>
+                                <p class="text-center text-sm">Average Pooling</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="bg-yellow-50 p-4 rounded">
+                                <h4 class="font-bold text-yellow-800 mb-2">Max Calculation:</h4>
+                                <p class="formula text-sm">max{4, 2, 8, 6} = 8</p>
+                                <p class="text-sm mt-2">The maximum value in the 2×2 region is 8</p>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded">
+                                <h4 class="font-bold text-green-800 mb-2">Average Calculation:</h4>
+                                <p class="formula text-sm">(4 + 2 + 8 + 6)/4 = 20/4 = 5</p>
+                                <p class="text-sm mt-2">Sum divided by number of elements</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Mathematical Properties</h2>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-red-800 mb-2">Translation Invariance</h3>
+                            <p class="formula text-sm">f(x + Δ) ≈ f(x)</p>
+                            <p class="text-sm mt-2">Small translations don't significantly change output</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-blue-800 mb-2">Dimensionality Reduction</h3>
+                            <p class="formula text-sm">O = ⌊(W - K)/S⌋ + 1</p>
+                            <p class="text-sm mt-2">Reduces spatial dimensions by factor S</p>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-purple-800 mb-2">Information Loss</h3>
+                            <p class="formula text-sm">H(Y) ≤ H(X)</p>
+                            <p class="text-sm mt-2">Entropy decreases, information is lost</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Activation Functions Math -->
+    <div class="slide" id="slide9">
+        <div class="container mx-auto px-8 py-16">
+            <h1 class="text-5xl font-bold text-white mb-8 text-center">Activation Functions Mathematics</h1>
+            <div class="max-w-6xl mx-auto">
+                <div class="math-box mb-8">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Mathematical Definitions and Derivatives</h2>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-blue-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-blue-800 mb-4">ReLU (Rectified Linear Unit)</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Function:</p>
+                                    <p class="formula">f(x) = max(0, x)</p>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Derivative:</p>
+                                    <p class="formula">f'(x) = { 1 if x > 0, 0 otherwise }</p>
+                                </div>
+                                <div class="bg-blue-100 p-3 rounded">
+                                    <p class="font-semibold text-sm">Second Derivative:</p>
+                                    <p class="formula text-sm">f''(x) = 0 for x ≠ 0</p>
+                                    <p class="text-sm mt-1">Undefined at x = 0 (subgradient = 0)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-green-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-green-800 mb-4">Sigmoid</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Function:</p>
+                                    <p class="formula">f(x) = 1/(1 + e<sup>-x</sup>)</p>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Derivative:</p>
+                                    <p class="formula">f'(x) = f(x)(1 - f(x))</p>
+                                </div>
+                                <div class="bg-green-100 p-3 rounded">
+                                    <p class="font-semibold text-sm">Properties:</p>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• Range: (0, 1)</li>
+                                        <li>• Maximum derivative: 0.25 at x=0</li>
+                                        <li>• Saturates for |x| > 4</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-yellow-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-yellow-800 mb-4">Tanh</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Function:</p>
+                                    <p class="formula">f(x) = (e<sup>x</sup> - e<sup>-x</sup>)/(e<sup>x</sup> + e<sup>-x</sup>)</p>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Derivative:</p>
+                                    <p class="formula">f'(x) = 1 - f(x)<sup>2</sup></p>
+                                </div>
+                                <div class="bg-yellow-100 p-3 rounded">
+                                    <p class="font-semibold text-sm">Properties:</p>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• Range: (-1, 1)</li>
+                                        <li>• Zero-centered</li>
+                                        <li>• Maximum derivative: 1 at x=0</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-purple-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-purple-800 mb-4">Leaky ReLU</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Function:</p>
+                                    <p class="formula">f(x) = { x if x > 0, αx otherwise }</p>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Derivative:</p>
+                                    <p class="formula">f'(x) = { 1 if x > 0, α otherwise }</p>
+                                </div>
+                                <div class="bg-purple-100 p-3 rounded">
+                                    <p class="font-semibold text-sm">Typical Values:</p>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• α = 0.01 (common)</li>
+                                        <li>• α = 0.1 (PReLU)</li>
+                                        <li>• Prevents dying neurons</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Mathematical Analysis</h2>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-red-800 mb-2">Vanishing Gradient</h3>
+                            <p class="formula text-sm">∏<sub>l</sub> f'(z<sup>(l)</sup>) → 0</p>
+                            <p class="text-sm mt-2">Problem with sigmoid/tanh in deep networks</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-blue-800 mb-2">Exploding Gradient</h3>
+                            <p class="formula text-sm">∏<sub>l</sub> f'(z<sup>(l)</sup>) → ∞</p>
+                            <p class="text-sm mt-2">Can occur with ReLU in deep networks</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-green-800 mb-2">Dead Neurons</h3>
+                            <p class="formula text-sm">f'(x) = 0 for x < 0</p>
+                            <p class="text-sm mt-2">ReLU neurons can stop learning</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Gradient Calculations -->
+    <div class="slide" id="slide10">
+        <div class="container mx-auto px-8 py-16">
+            <h1 class="text-5xl font-bold text-white mb-8 text-center">Gradient Calculations</h1>
+            <div class="max-w-6xl mx-auto">
+                <div class="math-box mb-8">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Complete Gradient Flow</h2>
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg">
+                        <h3 class="font-bold text-purple-800 mb-4">Forward and Backward Pass</h3>
+                        <div class="space-y-4">
+                            <div class="bg-white p-4 rounded">
+                                <p class="font-semibold mb-2">Forward Pass (Layer l):</p>
+                                <p class="formula">z<sup>(l)</sup> = W<sup>(l)</sup>a<sup>(l-1)</sup> + b<sup>(l)</sup></p>
+                                <p class="formula">a<sup>(l)</sup> = σ(z<sup>(l)</sup>)</p>
+                            </div>
+                            <div class="bg-white p-4 rounded">
+                                <p class="font-semibold mb-2">Backward Pass (Layer l):</p>
+                                <p class="formula">δ<sup>(l)</sup> = (W<sup>(l+1)</sup>)<sup>T</sup>δ<sup>(l+1)</sup> ⊙ σ'(z<sup>(l)</sup>)</p>
+                                <p class="formula">∂L/∂W<sup>(l)</sup> = δ<sup>(l)</sup>(a<sup>(l-1)</sup>)<sup>T</sup></p>
+                                <p class="formula">∂L/∂b<sup>(l)</sup> = δ<sup>(l)</sup></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box mb-8">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Detailed Gradient Computations</h2>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-blue-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-blue-800 mb-4">Weight Gradient</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Formula:</p>
+                                    <p class="formula">∂L/∂w<sub>ij</sub><sup>(l)</sup> = a<sub>j</sub><sup>(l-1)</sup> · δ<sub>i</sub><sup>(l)</sup></p>
+                                </div>
+                                <div class="bg-blue-100 p-3 rounded">
+                                    <p class="font-semibold text-sm">Matrix Form:</p>
+                                    <p class="formula text-sm">∂L/∂W<sup>(l)</sup> = δ<sup>(l)</sup> (a<sup>(l-1)</sup>)<sup>T</sup></p>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <p class="text-sm">
+                                        Each weight's gradient is the product of the input activation and the error signal
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-green-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-green-800 mb-4">Bias Gradient</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Formula:</p>
+                                    <p class="formula">∂L/∂b<sub>i</sub><sup>(l)</sup> = δ<sub>i</sub><sup>(l)</sup></p>
+                                </div>
+                                <div class="bg-green-100 p-3 rounded">
+                                    <p class="font-semibold text-sm">Matrix Form:</p>
+                                    <p class="formula text-sm">∂L/∂b<sup>(l)</sup> = δ<sup>(l)</sup></p>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <p class="text-sm">
+                                        Bias gradient is simply the error signal, no multiplication needed
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Activation Gradient</h2>
+                    <div class="bg-yellow-50 p-6 rounded-lg">
+                        <h3 class="font-bold text-yellow-800 mb-4">Chain Rule Application</h3>
+                        <div class="space-y-4">
+                            <div class="bg-white p-4 rounded">
+                                <p class="font-semibold mb-2">Error Signal Propagation:</p>
+                                <p class="formula">δ<sup>(l)</sup> = (W<sup>(l+1)</sup>)<sup>T</sup>δ<sup>(l+1)</sup> ⊙ σ'(z<sup>(l)</sup>)</p>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="bg-yellow-100 p-3 rounded">
+                                    <p class="font-semibold text-sm">For ReLU:</p>
+                                    <p class="formula text-sm">σ'(z) = {1 if z>0, 0 otherwise}</p>
+                                </div>
+                                <div class="bg-yellow-100 p-3 rounded">
+                                    <p class="font-semibold text-sm">For Sigmoid:</p>
+                                    <p class="formula text-sm">σ'(z) = σ(z)(1-σ(z))</p>
+                                </div>
+                                <div class="bg-yellow-100 p-3 rounded">
+                                    <p class="font-semibold text-sm">For Tanh:</p>
+                                    <p class="formula text-sm">σ'(z) = 1 - tanh²(z)</p>
+                                </div>
+                            </div>
+                            <div class="bg-white p-4 rounded">
+                                <p class="text-sm">
+                                    The ⊙ symbol denotes element-wise multiplication (Hadamard product)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 11: Optimization Mathematics -->
+    <div class="slide" id="slide11">
+        <div class="container mx-auto px-8 py-16">
+            <h1 class="text-5xl font-bold text-white mb-8 text-center">Optimization Mathematics</h1>
+            <div class="max-w-6xl mx-auto">
+                <div class="math-box mb-8">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Gradient Descent Variants</h2>
+                    <div class="space-y-6">
+                        <div class="bg-blue-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-blue-800 mb-4">Stochastic Gradient Descent (SGD)</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-4 rounded">
+                                    <p class="font-semibold mb-2">Update Rule:</p>
+                                    <p class="formula">θ<sub>t+1</sub> = θ<sub>t</sub> - η ∇J(θ<sub>t</sub>)</p>
+                                </div>
+                                <div class="bg-blue-100 p-4 rounded">
+                                    <p class="font-semibold text-sm mb-2">With Momentum:</p>
+                                    <p class="formula text-sm">v<sub>t</sub> = βv<sub>t-1</sub> + (1-β)∇J(θ<sub>t</sub>)</p>
+                                    <p class="formula text-sm">θ<sub>t+1</sub> = θ<sub>t</sub> - ηv<sub>t</sub></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-green-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-green-800 mb-4">Adam Optimizer</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-4 rounded">
+                                    <p class="font-semibold mb-2">First Moment (Momentum):</p>
+                                    <p class="formula">m<sub>t</sub> = β<sub>1</sub>m<sub>t-1</sub> + (1-β<sub>1</sub>)∇J(θ<sub>t</sub>)</p>
+                                </div>
+                                <div class="bg-white p-4 rounded">
+                                    <p class="font-semibold mb-2">Second Moment (RMSprop):</p>
+                                    <p class="formula">v<sub>t</sub> = β<sub>2</sub>v<sub>t-1</sub> + (1-β<sub>2</sub>)(∇J(θ<sub>t</sub>))²</p>
+                                </div>
+                                <div class="bg-green-100 p-4 rounded">
+                                    <p class="font-semibold text-sm mb-2">Update Rule:</p>
+                                    <p class="formula text-sm">θ<sub>t+1</sub> = θ<sub>t</sub> - η · m̂<sub>t</sub> / (√v̂<sub>t</sub> + ε)</p>
+                                    <p class="text-sm mt-1">Where m̂<sub>t</sub> = m<sub>t</sub>/(1-β<sub>1</sub><sup>t</sup>), v̂<sub>t</sub> = v<sub>t</sub>/(1-β<sub>2</sub><sup>t</sup>)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box mb-8">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Learning Rate Schedules</h2>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-yellow-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-yellow-800 mb-4">Step Decay</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Formula:</p>
+                                    <p class="formula">η<sub>t</sub> = η<sub>0</sub> · γ<sup>⌊t/s⌋</sup></p>
+                                </div>
+                                <div class="bg-yellow-100 p-3 rounded">
+                                    <p class="text-sm">
+                                        <strong>γ:</strong> Decay factor (e.g., 0.1)<br>
+                                        <strong>s:</strong> Steps per decay (e.g., 1000)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-purple-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-purple-800 mb-4">Exponential Decay</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Formula:</p>
+                                    <p class="formula">η<sub>t</sub> = η<sub>0</sub> · e<sup>-kt</sup></p>
+                                </div>
+                                <div class="bg-purple-100 p-3 rounded">
+                                    <p class="text-sm">
+                                        <strong>k:</strong> Decay rate<br>
+                                        Smooth continuous decay
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Convergence Analysis</h2>
+                    <div class="bg-red-50 p-6 rounded-lg">
+                        <h3 class="font-bold text-red-800 mb-4">Mathematical Conditions</h3>
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="bg-white p-4 rounded">
+                                <h4 class="font-semibold mb-2">Lipschitz Continuity:</h4>
+                                <p class="formula text-sm">||∇J(x) - ∇J(y)|| ≤ L||x - y||</p>
+                                <p class="text-sm mt-2">Ensures bounded gradients</p>
+                            </div>
+                            <div class="bg-white p-4 rounded">
+                                <h4 class="font-semibold mb-2">Strong Convexity:</h4>
+                                <p class="formula text-sm">J(y) ≥ J(x) + ∇J(x)<sup>T</sup>(y-x) + (μ/2)||y-x||²</p>
+                                <p class="text-sm mt-2">Guarantees unique minimum</p>
+                            </div>
+                        </div>
+                        <div class="bg-red-100 p-4 rounded mt-4">
+                            <h4 class="font-semibold mb-2">Convergence Rate:</h4>
+                            <p class="formula">J(θ<sub>t</sub>) - J(θ<sup>*</sup>) ≤ (1 - μη)<sup>t</sup>(J(θ<sub>0</sub>) - J(θ<sup>*</sup>))</p>
+                            <p class="text-sm mt-2">Linear convergence for strongly convex functions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 12: Real-world Implementations -->
+    <div class="slide" id="slide12">
+        <div class="container mx-auto px-8 py-16">
+            <h1 class="text-5xl font-bold text-white mb-8 text-center">Real-world Implementations</h1>
+            <div class="max-w-6xl mx-auto">
+                <div class="math-box mb-8">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Performance Metrics Mathematics</h2>
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="bg-blue-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-blue-800 mb-4">Classification Metrics</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Accuracy:</p>
+                                    <p class="formula text-sm">Acc = (TP + TN)/(TP + TN + FP + FN)</p>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Precision:</p>
+                                    <p class="formula text-sm">P = TP/(TP + FP)</p>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Recall:</p>
+                                    <p class="formula text-sm">R = TP/(TP + FN)</p>
+                                </div>
+                                <div class="bg-blue-100 p-3 rounded">
+                                    <p class="font-semibold">F1-Score:</p>
+                                    <p class="formula text-sm">F1 = 2PR/(P + R)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-green-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-green-800 mb-4">Object Detection Metrics</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">IoU (Intersection over Union):</p>
+                                    <p class="formula text-sm">IoU = |A ∩ B|/|A ∪ B|</p>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">mAP (mean Average Precision):</p>
+                                    <p class="formula text-sm">mAP = (1/n)∑<sub>i=1</sub><sup>n</sup> AP<sub>i</sub></p>
+                                </div>
+                                <div class="bg-green-100 p-3 rounded">
+                                    <p class="text-sm">
+                                        AP = ∫<sub>0</sub><sup>1</sup> P(R) dR<br>
+                                        Average precision across recall levels
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-yellow-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-yellow-800 mb-4">Segmentation Metrics</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Pixel Accuracy:</p>
+                                    <p class="formula text-sm">PA = (∑<sub>i</sub> p<sub>ii</sub>)/(∑<sub>i</sub> ∑<sub>j</sub> p<sub>ij</sub>)</p>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Mean IoU:</p>
+                                    <p class="formula text-sm">mIoU = (1/n)∑<sub>i=1</sub><sup>n</sup> IoU<sub>i</sub></p>
+                                </div>
+                                <div class="bg-yellow-100 p-3 rounded">
+                                    <p class="text-sm">
+                                        Dice Coefficient: DSC = 2|A ∩ B|/(|A| + |B|)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box mb-8">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Computational Complexity</h2>
+                    <div class="bg-purple-50 p-6 rounded-lg">
+                        <h3 class="font-bold text-purple-800 mb-4">FLOPs Calculation</h3>
+                        <div class="space-y-4">
+                            <div class="bg-white p-4 rounded">
+                                <h4 class="font-semibold mb-2">Convolution Layer:</h4>
+                                <p class="formula">FLOPs = H<sub>out</sub> × W<sub>out</sub> × C<sub>in</sub> × K<sub>h</sub> × K<sub>w</sub> × C<sub>out</sub> × 2</p>
+                                <p class="text-sm mt-2">×2 for multiply and add operations</p>
+                            </div>
+                            <div class="bg-white p-4 rounded">
+                                <h4 class="font-semibold mb-2">Fully Connected Layer:</h4>
+                                <p class="formula">FLOPs = I × O × 2</p>
+                                <p class="text-sm mt-2">I: Input size, O: Output size</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-purple-100 p-3 rounded">
+                                    <p class="font-semibold text-sm">ResNet-50:</p>
+                                    <p class="text-sm">~4.1 GFLOPs</p>
+                                </div>
+                                <div class="bg-purple-100 p-3 rounded">
+                                    <p class="font-semibold text-sm">VGG-16:</p>
+                                    <p class="text-sm">~15.5 GFLOPs</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Mathematical Optimization Techniques</h2>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-red-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-red-800 mb-4">Quantization</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Linear Quantization:</p>
+                                    <p class="formula text-sm">q = round(r/s + z)</p>
+                                    <p class="text-sm mt-1">r: real, s: scale, z: zero-point</p>
+                                </div>
+                                <div class="bg-red-100 p-3 rounded">
+                                    <p class="text-sm">
+                                        Reduces precision from FP32 to INT8<br>
+                                        4× memory reduction, 2-4× speedup
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-blue-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-blue-800 mb-4">Pruning</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">L1 Regularization:</p>
+                                    <p class="formula text-sm">L = L<sub>task</sub> + λ∑|w<sub>i</sub>|</p>
+                                </div>
+                                <div class="bg-blue-100 p-3 rounded">
+                                    <p class="text-sm">
+                                        Removes small weights<br>
+                                        Can reduce model size by 50-90%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 13: Performance Analysis -->
+    <div class="slide" id="slide13">
+        <div class="container mx-auto px-8 py-16">
+            <h1 class="text-5xl font-bold text-white mb-8 text-center">Performance Analysis</h1>
+            <div class="max-w-6xl mx-auto">
+                <div class="math-box mb-8">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Mathematical Performance Metrics</h2>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-blue-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-blue-800 mb-4">Time Complexity</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Training Time:</p>
+                                    <p class="formula text-sm">T<sub>train</sub> = O(N · B · E · FLOPs)</p>
+                                    <p class="text-sm mt-1">N: samples, B: batch size, E: epochs</p>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Inference Time:</p>
+                                    <p class="formula text-sm">T<sub>infer</sub> = O(FLOPs / Computational Power)</p>
+                                </div>
+                                <div class="bg-blue-100 p-3 rounded">
+                                    <p class="text-sm">
+                                        Latency: Time per prediction<br>
+                                        Throughput: Predictions per second
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-green-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-bold text-green-800 mb-4">Space Complexity</h3>
+                            <div class="space-y-3">
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Model Size:</p>
+                                    <p class="formula text-sm">S = ∑<sub>l</sub> (|W<sup>(l)</sup>| + |b<sup>(l)</sup>|) × bytes_per_param</p>
+                                </div>
+                                <div class="bg-white p-3 rounded">
+                                    <p class="font-semibold">Memory Usage:</p>
+                                    <p class="formula text-sm">M = S + ∑<sub>l</sub> |a<sup>(l)</sup>| × bytes_per_activation</p>
+                                </div>
+                                <div class="bg-green-100 p-3 rounded">
+                                    <p class="text-sm">
+                                        FP32: 4 bytes/param<br>
+                                        INT8: 1 byte/param
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box mb-8">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Accuracy-Complexity Trade-off</h2>
+                    <div class="bg-purple-50 p-6 rounded-lg">
+                        <h3 class="font-bold text-purple-800 mb-4">Mathematical Relationship</h3>
+                        <div class="space-y-4">
+                            <div class="bg-white p-4 rounded">
+                                <p class="font-semibold mb-2">Accuracy Model:</p>
+                                <p class="formula">Acc = f(Parameters, FLOPs, Data)</p>
+                                <p class="text-sm mt-2">Generally: Acc ∝ log(Parameters) for large models</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-purple-100 p-3 rounded">
+                                    <p class="font-semibold text-sm">Power Law:</p>
+                                    <p class="formula text-sm">Acc = a · N<sup>b</sup> + c</p>
+                                    <p class="text-sm mt-1">N: model size, b ≈ 0.1</p>
+                                </div>
+                                <div class="bg-purple-100 p-3 rounded">
+                                    <p class="font-semibold text-sm">Diminishing Returns:</p>
+                                    <p class="formula text-sm">∂Acc/∂N → 0 as N → ∞</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Optimization Strategies</h2>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-yellow-800 mb-2">Architecture Search</h3>
+                            <p class="formula text-sm">min Cost s.t. Acc ≥ Acc<sub>min</sub></p>
+                            <ul class="text-sm mt-2 space-y-1">
+                                <li>• Neural Architecture Search</li>
+                                <li>• EfficientNet scaling</li>
+                                <li>• MobileNet design</li>
+                            </ul>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-red-800 mb-2">Knowledge Distillation</h3>
+                            <p class="formula text-sm">L<sub>KD</sub> = αL<sub>task</sub> + (1-α)L<sub>soft</sub></p>
+                            <ul class="text-sm mt-2 space-y-1">
+                                <li>• Teacher-student learning</li>
+                                <li>• Soft targets</li>
+                                <li>• Model compression</li>
+                            </ul>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h3 class="font-bold text-blue-800 mb-2">Hardware Optimization</h3>
+                            <p class="formula text-sm">Speedup = T<sub>CPU</sub>/T<sub>optimized</sub></p>
+                            <ul class="text-sm mt-2 space-y-1">
+                                <li>• Tensor cores</li>
+                                <li>• Quantization</li>
+                                <li>• Pruning</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="math-box mt-8 text-center">
+                    <h2 class="text-2xl font-bold text-purple-600 mb-4">Thank You!</h2>
+                    <p class="text-gray-700 mb-4">Complete mathematical understanding of CNNs achieved</p>
+                    <div class="flex justify-center gap-4">
+                        <button class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition">
+                            <i class="fas fa-download mr-2"></i>Download Materials
+                        </button>
+                        <button class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
+                            <i class="fas fa-code mr-2"></i>View Code
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 13;
+
+        // Initialize grids for convolution animation
+        function initializeGrids() {
+            // Input grid (5x5)
+            const inputGrid = document.getElementById('inputGrid');
+            const inputValues = [
+                [1, 2, 3, 4, 5],
+                [6, 7, 8, 9, 10],
+                [11, 12, 13, 14, 15],
+                [16, 17, 18, 19, 20],
+                [21, 22, 23, 24, 25]
+            ];
+            
+            inputGrid.innerHTML = '';
+            inputValues.flat().forEach(value => {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                cell.textContent = value;
+                inputGrid.appendChild(cell);
+            });
+
+            // Kernel grid (3x3)
+            const kernelGrid = document.getElementById('kernelGrid');
+            const kernelValues = [
+                [1, 0, -1],
+                [1, 0, -1],
+                [1, 0, -1]
+            ];
+            
+            kernelGrid.innerHTML = '';
+            kernelValues.flat().forEach(value => {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell kernel';
+                cell.textContent = value;
+                kernelGrid.appendChild(cell);
+            });
+
+            // Output grid (3x3)
+            const outputGrid = document.getElementById('outputGrid');
+            outputGrid.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                cell.textContent = '?';
+                outputGrid.appendChild(cell);
+            }
+        }
+
+        // Detailed convolution animation showing every calculation
+        async function startDetailedConvolution() {
+            const inputCells = document.querySelectorAll('#inputGrid .grid-cell');
+            const outputCells = document.querySelectorAll('#outputGrid .grid-cell');
+            const calculationDetails = document.getElementById('calculationDetails');
+            const multiplicationSteps = document.getElementById('multiplicationSteps');
+            const runningSum = document.getElementById('runningSum');
+            const sumValue = document.getElementById('sumValue');
+            
+            // Reset
+            outputCells.forEach(cell => {
+                cell.textContent = '?';
+                cell.classList.remove('highlight');
+            });
+            multiplicationSteps.innerHTML = '';
+            runningSum.style.display = 'none';
+
+            // Kernel positions for each output cell
+            const kernelPositions = [
+                [0, 1, 2, 5, 6, 7, 10, 11, 12], // Top-left
+                [1, 2, 3, 6, 7, 8, 11, 12, 13], // Top-center
+                [2, 3, 4, 7, 8, 9, 12, 13, 14], // Top-right
+                [5, 6, 7, 10, 11, 12, 15, 16, 17], // Middle-left
+                [6, 7, 8, 11, 12, 13, 16, 17, 18], // Center
+                [7, 8, 9, 12, 13, 14, 17, 18, 19], // Middle-right
+                [10, 11, 12, 15, 16, 17, 20, 21, 22], // Bottom-left
+                [11, 12, 13, 16, 17, 18, 21, 22, 23], // Bottom-center
+                [12, 13, 14, 17, 18, 19, 22, 23, 24]  // Bottom-right
+            ];
+
+            const kernelValues = [1, 0, -1, 1, 0, -1, 1, 0, -1];
+            const results = [-6, -6, -6, -6, -6, -6, -6, -6, -6];
+
+            for (let outputIdx = 0; outputIdx < 9; outputIdx++) {
+                // Clear previous highlights
+                inputCells.forEach(cell => cell.classList.remove('highlight', 'current'));
+                
+                // Show position info
+                const row = Math.floor(outputIdx / 3) + 1;
+                const col = (outputIdx % 3) + 1;
+                calculationDetails.innerHTML = `
+                    <div class="bg-blue-100 p-4 rounded-lg">
+                        <h4 class="font-bold text-blue-800 mb-2">Calculating Output Position [${row}, ${col}]</h4>
+                        <p class="text-sm">Kernel position: Top-left of highlighted region</p>
+                    </div>
+                `;
+
+                // Highlight kernel region
+                kernelPositions[outputIdx].forEach(pos => {
+                    inputCells[pos].classList.add('highlight');
+                });
+
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Calculate step by step
+                let sum = 0;
+                multiplicationSteps.innerHTML = '';
+                runningSum.style.display = 'block';
+                sumValue.textContent = '0';
+
+                for (let i = 0; i < 9; i++) {
+                    const inputVal = parseInt(inputCells[kernelPositions[outputIdx][i]].textContent);
+                    const kernelVal = kernelValues[i];
+                    const product = inputVal * kernelVal;
+                    sum += product;
+
+                    // Highlight current cell
+                    inputCells[kernelPositions[outputIdx][i]].classList.add('current');
+
+                    // Create multiplication step
+                    const stepDiv = document.createElement('div');
+                    stepDiv.className = 'calculation-step';
+                    stepDiv.innerHTML = `
+                        <div class="multiplication-display">
+                            <div class="multiplication-cell bg-blue-100">${inputVal}</div>
+                            <div class="text-2xl">×</div>
+                            <div class="multiplication-cell bg-red-100">${kernelVal}</div>
+                            <div class="text-2xl">=</div>
+                            <div class="multiplication-cell bg-green-100">${product}</div>
+                        </div>
+                    `;
+                    multiplicationSteps.appendChild(stepDiv);
+                    stepDiv.classList.add('active');
+
+                    // Update running sum
+                    sumValue.textContent = sum;
+
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    
+                    // Remove current highlight
+                    inputCells[kernelPositions[outputIdx][i]].classList.remove('current');
+                }
+
+                // Show final result
+                outputCells[outputIdx].textContent = sum;
+                outputCells[outputIdx].classList.add('highlight');
+                
+                // Add final calculation
+                const finalStep = document.createElement('div');
+                finalStep.className = 'calculation-step bg-yellow-100';
+                finalStep.innerHTML = `
+                    <div class="text-center font-bold">
+                        Final Result for Position [${row}, ${col}]: ${sum}
+                    </div>
+                `;
+                multiplicationSteps.appendChild(finalStep);
+                finalStep.classList.add('active');
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Clear highlights
+                inputCells.forEach(cell => cell.classList.remove('highlight'));
+                outputCells[outputIdx].classList.remove('highlight');
+            }
+
+            calculationDetails.innerHTML = `
+                <div class="bg-green-100 p-4 rounded-lg">
+                    <h4 class="font-bold text-green-800 mb-2">Convolution Complete!</h4>
+                    <p class="text-sm">All output positions calculated successfully</p>
+                </div>
+            `;
+        }
+
+        // Complete CNN example with all calculations
+        async function startCompleteExample() {
+            const exampleSteps = document.getElementById('exampleSteps');
+            exampleSteps.innerHTML = '';
+
+            // Step 1: Input
+            const step1 = document.createElement('div');
+            step1.className = 'step-detail';
+            step1.innerHTML = `
+                <div class="flex items-center mb-3">
+                    <div class="step-number">1</div>
+                    <h3 class="text-xl font-bold text-purple-800">Input Layer</h3>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <p class="font-semibold mb-2">4×4 Grayscale Image:</p>
+                    <div class="grid grid-cols-4 gap-2 w-48 mx-auto">
+                        <div class="bg-white p-2 text-center font-bold">1</div>
+                        <div class="bg-white p-2 text-center font-bold">2</div>
+                        <div class="bg-white p-2 text-center font-bold">3</div>
+                        <div class="bg-white p-2 text-center font-bold">4</div>
+                        <div class="bg-white p-2 text-center font-bold">5</div>
+                        <div class="bg-white p-2 text-center font-bold">6</div>
+                        <div class="bg-white p-2 text-center font-bold">7</div>
+                        <div class="bg-white p-2 text-center font-bold">8</div>
+                        <div class="bg-white p-2 text-center font-bold">9</div>
+                        <div class="bg-white p-2 text-center font-bold">10</div>
+                        <div class="bg-white p-2 text-center font-bold">11</div>
+                        <div class="bg-white p-2 text-center font-bold">12</div>
+                        <div class="bg-white p-2 text-center font-bold">13</div>
+                        <div class="bg-white p-2 text-center font-bold">14</div>
+                        <div class="bg-white p-2 text-center font-bold">15</div>
+                        <div class="bg-white p-2 text-center font-bold">16</div>
+                    </div>
+                    <p class="text-center mt-2 text-sm">Shape: (4, 4, 1)</p>
+                </div>
+            `;
+            exampleSteps.appendChild(step1);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Step 2: Convolution
+            const step2 = document.createElement('div');
+            step2.className = 'step-detail';
+            step2.innerHTML = `
+                <div class="flex items-center mb-3">
+                    <div class="step-number">2</div>
+                    <h3 class="text-xl font-bold text-purple-800">Convolution Layer</h3>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <p class="font-semibold mb-2">Kernel (3×3):</p>
+                    <div class="grid grid-cols-3 gap-2 w-36 mx-auto mb-3">
+                        <div class="bg-red-100 p-2 text-center font-bold">1</div>
+                        <div class="bg-red-100 p-2 text-center font-bold">0</div>
+                        <div class="bg-red-100 p-2 text-center font-bold">-1</div>
+                        <div class="bg-red-100 p-2 text-center font-bold">1</div>
+                        <div class="bg-red-100 p-2 text-center font-bold">0</div>
+                        <div class="bg-red-100 p-2 text-center font-bold">-1</div>
+                        <div class="bg-red-100 p-2 text-center font-bold">1</div>
+                        <div class="bg-red-100 p-2 text-center font-bold">0</div>
+                        <div class="bg-red-100 p-2 text-center font-bold">-1</div>
+                    </div>
+                    <p class="font-semibold mb-2">Output Size Calculation:</p>
+                    <p class="formula text-sm">O = ⌊(4 - 3 + 2×0)/1⌋ + 1 = 2</p>
+                    <p class="font-semibold mb-2">Convolution Results:</p>
+                    <div class="calculation-grid">
+                        <div class="calculation-item">
+                            <p class="text-xs text-gray-600">Position [1,1]</p>
+                            <p class="font-bold">-12</p>
+                        </div>
+                        <div class="calculation-item">
+                            <p class="text-xs text-gray-600">Position [1,2]</p>
+                            <p class="font-bold">-12</p>
+                        </div>
+                        <div class="calculation-item">
+                            <p class="text-xs text-gray-600">Position [2,1]</p>
+                            <p class="font-bold">-12</p>
+                        </div>
+                        <div class="calculation-item">
+                            <p class="text-xs text-gray-600">Position [2,2]</p>
+                            <p class="font-bold">-12</p>
+                        </div>
+                    </div>
+                    <p class="text-center mt-2 text-sm">Shape: (2, 2, 1)</p>
+                </div>
+            `;
+            exampleSteps.appendChild(step2);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Step 3: ReLU Activation
+            const step3 = document.createElement('div');
+            step3.className = 'step-detail';
+            step3.innerHTML = `
+                <div class="flex items-center mb-3">
+                    <div class="step-number">3</div>
+                    <h3 class="text-xl font-bold text-purple-800">ReLU Activation</h3>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <p class="font-semibold mb-2">ReLU Function: f(x) = max(0, x)</p>
+                    <div class="calculation-grid">
+                        <div class="calculation-item">
+                            <p class="text-xs text-gray-600">Input: -12</p>
+                            <p class="font-bold text-red-600">0</p>
+                        </div>
+                        <div class="calculation-item">
+                            <p class="text-xs text-gray-600">Input: -12</p>
+                            <p class="font-bold text-red-600">0</p>
+                        </div>
+                        <div class="calculation-item">
+                            <p class="text-xs text-gray-600">Input: -12</p>
+                            <p class="font-bold text-red-600">0</p>
+                        </div>
+                        <div class="calculation-item">
+                            <p class="text-xs text-gray-600">Input: -12</p>
+                            <p class="font-bold text-red-600">0</p>
+                        </div>
+                    </div>
+                    <p class="text-center mt-2 text-sm">All negative values become 0</p>
+                    <p class="text-center text-sm">Shape: (2, 2, 1)</p>
+                </div>
+            `;
+            exampleSteps.appendChild(step3);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Step 4: Max Pooling
+            const step4 = document.createElement('div');
+            step4.className = 'step-detail';
+            step4.innerHTML = `
+                <div class="flex items-center mb-3">
+                    <div class="step-number">4</div>
+                    <h3 class="text-xl font-bold text-purple-800">Max Pooling</h3>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg">
+                    <p class="font-semibold mb-2">2×2 Max Pooling:</p>
+                    <div class="flex justify-center items-center gap-4 mb-3">
+                        <div>
+                            <p class="text-sm text-center mb-1">Input Region</p>
+                            <div class="grid grid-cols-2 gap-1">
+                                <div class="bg-white p-2 text-center">0</div>
+                                <div class="bg-white p-2 text-center">0</div>
+                                <div class="bg-white p-2 text-center">0</div>
+                                <div class="bg-white p-2 text-center">0</div>
+                            </div>
+                        </div>
+                        <i class="fas fa-arrow-right text-2xl text-red-600"></i>
+                        <div>
+                            <p class="text-sm text-center mb-1">Output</p>
+                            <div class="bg-red-100 p-3 text-center font-bold">0</div>
+                        </div>
+                    </div>
+                    <p class="formula text-sm">max{0, 0, 0, 0} = 0</p>
+                    <p class="text-center mt-2 text-sm">Shape: (1, 1, 1)</p>
+                </div>
+            `;
+            exampleSteps.appendChild(step4);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Step 5: Flatten
+            const step5 = document.createElement('div');
+            step5.className = 'step-detail';
+            step5.innerHTML = `
+                <div class="flex items-center mb-3">
+                    <div class="step-number">5</div>
+                    <h3 class="text-xl font-bold text-purple-800">Flatten</h3>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg">
+                    <p class="font-semibold mb-2">Reshape to Vector:</p>
+                    <div class="text-center">
+                        <div class="bg-white inline-block p-3 rounded font-bold mb-2">[0]</div>
+                    </div>
+                    <p class="text-center mt-2 text-sm">Shape: (1,)</p>
+                </div>
+            `;
+            exampleSteps.appendChild(step5);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Step 6: Fully Connected Layer
+            const step6 = document.createElement('div');
+            step6.className = 'step-detail';
+            step6.innerHTML = `
+                <div class="flex items-center mb-3">
+                    <div class="step-number">6</div>
+                    <h3 class="text-xl font-bold text-purple-800">Fully Connected Layer</h3>
+                </div>
+                <div class="bg-indigo-50 p-4 rounded-lg">
+                    <p class="font-semibold mb-2">Weights (1×2): [0.5, -0.3]</p>
+                    <p class="font-semibold mb-2">Bias (1×2): [0.1, 0.2]</p>
+                    <p class="font-semibold mb-2">Calculation:</p>
+                    <div class="space-y-2">
+                        <div class="bg-white p-2 rounded">
+                            <p class="text-sm">Neuron 1: 0 × 0.5 + 0.1 = 0.1</p>
+                        </div>
+                        <div class="bg-white p-2 rounded">
+                            <p class="text-sm">Neuron 2: 0 × (-0.3) + 0.2 = 0.2</p>
+                        </div>
+                    </div>
+                    <p class="text-center mt-2 text-sm">Output: [0.1, 0.2]</p>
+                    <p class="text-center text-sm">Shape: (2,)</p>
+                </div>
+            `;
+            exampleSteps.appendChild(step6);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Step 7: Softmax
+            const step7 = document.createElement('div');
+            step7.className = 'step-detail';
+            step7.innerHTML = `
+                <div class="flex items-center mb-3">
+                    <div class="step-number">7</div>
+                    <h3 class="text-xl font-bold text-purple-800">Softmax Output</h3>
+                </div>
+                <div class="bg-pink-50 p-4 rounded-lg">
+                    <p class="font-semibold mb-2">Input: [0.1, 0.2]</p>
+                    <p class="font-semibold mb-2">Softmax Formula:</p>
+                    <p class="formula text-sm">softmax(x<sub>i</sub>) = e<sup>x<sub>i</sub></sup> / ∑<sub>j</sub> e<sup>x<sub>j</sub></sup></p>
+                    <div class="space-y-2">
+                        <div class="bg-white p-2 rounded">
+                            <p class="text-sm">e<sup>0.1</sup> = 1.1052</p>
+                        </div>
+                        <div class="bg-white p-2 rounded">
+                            <p class="text-sm">e<sup>0.2</sup> = 1.2214</p>
+                        </div>
+                        <div class="bg-white p-2 rounded">
+                            <p class="text-sm">Sum = 1.1052 + 1.2214 = 2.3266</p>
+                        </div>
+                    </div>
+                    <div class="calculation-grid mt-3">
+                        <div class="calculation-item">
+                            <p class="text-xs text-gray-600">Class 1</p>
+                            <p class="font-bold">0.475</p>
+                        </div>
+                        <div class="calculation-item">
+                            <p class="text-xs text-gray-600">Class 2</p>
+                            <p class="font-bold">0.525</p>
+                        </div>
+                    </div>
+                    <p class="text-center mt-2 text-sm">Final Output: [0.475, 0.525]</p>
+                </div>
+            `;
+            exampleSteps.appendChild(step7);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Summary
+            const summary = document.createElement('div');
+            summary.className = 'step-detail bg-gradient-to-r from-green-50 to-blue-50';
+            summary.innerHTML = `
+                <div class="flex items-center mb-3">
+                    <div class="step-number">✓</div>
+                    <h3 class="text-xl font-bold text-green-800">Complete Forward Pass Summary</h3>
+                </div>
+                <div class="bg-white p-4 rounded-lg">
+                    <p class="font-semibold mb-2">Input Shape: (4, 4, 1) → Output Shape: (2,)</p>
+                    <p class="font-semibold mb-2">Final Prediction: Class 2 (Probability: 52.5%)</p>
+                    <div class="mt-3 p-3 bg-gray-100 rounded">
+                        <p class="text-sm"><strong>Total Parameters:</strong> 4 (FC weights) + 2 (FC biases) + 9 (Conv kernel) = 15</p>
+                        <p class="text-sm"><strong>Total FLOPs:</strong> 36 (Conv) + 4 (FC) = 40</p>
+                    </div>
+                </div>
+            `;
+            exampleSteps.appendChild(summary);
+        }
+
+        // Navigation functions
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            if (n > totalSlides) currentSlide = 1;
+            if (n < 1) currentSlide = totalSlides;
+            
+            slides[currentSlide - 1].classList.add('active');
+            document.getElementById('currentStep').textContent = currentSlide;
+            
+            // Initialize grids if on convolution slide
+            if (currentSlide === 6) {
+                initializeGrids();
+            }
+        }
+
+        function nextSlide() {
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+
+        function previousSlide() {
+            currentSlide--;
+            showSlide(currentSlide);
+        }
+
+        function goToSlide(n) {
+            currentSlide = n;
+            showSlide(currentSlide);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+        });
+
+        // Initialize
+        document.getElementById('totalSteps').textContent = totalSlides;
+        showSlide(currentSlide);
+
+        // Add entrance animations
+        gsap.from(".math-box", {
+            duration: 1,
+            y: 50,
+            opacity: 0,
+            stagger: 0.2,
+            ease: "power3.out"
+        });
+    </script>
+</body>
+</html>
