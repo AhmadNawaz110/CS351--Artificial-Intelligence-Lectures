@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logistic Regression Derivation</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .slide-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .slide {
+            padding: 40px;
+            border-bottom: 1px solid #eee;
+        }
+        .slide:last-child {
+            border-bottom: none;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            font-size: 1.8em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        h3 {
+            color: #34495e;
+            font-size: 1.4em;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        p, li {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        ul {
+            padding-left: 25px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .math-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .key-point {
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .summary {
+            background-color: #f0f7ff;
+            border: 1px solid #d0e3ff;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 30px;
+        }
+        .slide-number {
+            text-align: right;
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-top: 30px;
+        }
+        .boxed {
+            border: 2px solid #3498db;
+            padding: 10px;
+            display: inline-block;
+            margin: 10px 0;
+            background-color: #e8f4fc;
+            border-radius: 5px;
+        }
+        .interactive-container {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .slider-container {
+            margin: 20px 0;
+        }
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+        .slider:hover {
+            opacity: 1;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+        }
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+        }
+        .example-box {
+            background-color: #f0f7ff;
+            border: 1px solid #d0e3ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .step-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #2ecc71;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .calculation-step {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f1f8ff;
+            border-radius: 5px;
+        }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .data-point {
+            transition: all 0.3s ease;
+        }
+        .data-point:hover {
+            r: 8;
+        }
+        .decision-boundary {
+            stroke: #e74c3c;
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+        }
+        .gradient-arrow {
+            stroke: #9b59b6;
+            stroke-width: 2;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+        .tab-container {
+            margin: 20px 0;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <!-- Slide 1: Title -->
+        <div class="slide">
+            <h1>Step-by-Step Mathematical Derivation of Logistic Regression (Binary)</h1>
+            <ul>
+                <li>Derivation of loss function</li>
+                <li>Gradient computation</li>
+                <li>Hessian for Newton/IRLS method</li>
+                <li>Explicit calculus steps</li>
+                <li>Interactive visualizations</li>
+                <li>Step-by-step calculations</li>
+            </ul>
+            <div class="slide-number">Slide 1</div>
+        </div>
+
+        <!-- Slide 2: Model & Notation -->
+        <div class="slide">
+            <h2>Model & Notation</h2>
+            <p><strong>Input features</strong>: \(x^{(i)}\) (column vector)</p>
+            <p><strong>Dataset</strong>: \(\{(x^{(i)}, y^{(i)})\}_{i=1}^m\) with \(y^{(i)} \in \{0,1\}\)</p>
+            
+            <p><strong>Parameters</strong>:</p>
+            <ul>
+                <li>Weight vector \(w\)</li>
+                <li>Bias \(b\)</li>
+            </ul>
+            
+            <p><strong>Linear score</strong>: \(z^{(i)} = w^T x^{(i)} + b\)</p>
+            
+            <p><strong>Sigmoid (logistic) function</strong>:</p>
+            <div class="math-box">
+                \[\sigma(z)=\frac{1}{1+e^{-z}}\]
+            </div>
+            
+            <p><strong>Prediction</strong>: \(\hat{y}^{(i)} = \sigma(z^{(i)})\)</p>
+            <div class="slide-number">Slide 2</div>
+        </div>
+
+        <!-- Slide 3: Likelihood and Cost Function -->
+        <div class="slide">
+            <h2>Likelihood and Cost Function</h2>
+            <p><strong>Likelihood</strong> of parameters given data:</p>
+            <div class="math-box">
+                \[\mathcal{L}(w,b)=\prod_{i=1}^m \big(\hat{y}^{(i)}\big)^{y^{(i)}}\big(1-\hat{y}^{(i)}\big)^{1-y^{(i)}}\]
+            </div>
+            
+            <p><strong>Negative log-likelihood</strong> (cross-entropy loss):</p>
+            <div class="math-box">
+                \[J(w,b) = -\frac{1}{m}\sum_{i=1}^m \Big[ y^{(i)}\log\hat{y}^{(i)} + (1-y^{(i)})\log(1-\hat{y}^{(i)}) \Big]\]
+            </div>
+            
+            <div class="key-point">
+                This is the <strong>binary cross-entropy</strong> (or logistic) loss.
+            </div>
+            <div class="slide-number">Slide 3</div>
+        </div>
+
+        <!-- Slide 4: Sigmoid Derivative -->
+        <div class="slide">
+            <h2>Useful Derivative: Sigmoid Derivative</h2>
+            <p><strong>Sigmoid function</strong>: \(\sigma(z)=\frac{1}{1+e^{-z}}\)</p>
+            
+            <p><strong>Derivative</strong>:</p>
+            <div class="math-box">
+                \[\frac{d\sigma}{dz} = \sigma(z)\big(1-\sigma(z)\big)\]
+            </div>
+            
+            <h3>Proof:</h3>
+            <ol>
+                <li>Differentiate directly: \(\sigma(z) = (1+e^{-z})^{-1}\)</li>
+                <li>Apply chain rule: \(\frac{d\sigma}{dz} = -(1+e^{-z})^{-2} \cdot (-e^{-z}) = \frac{e^{-z}}{(1+e^{-z})^2}\)</li>
+                <li>Simplify: \(\frac{e^{-z}}{(1+e^{-z})^2} = \frac{1}{1+e^{-z}} \cdot \frac{e^{-z}}{1+e^{-z}} = \sigma(z)(1-\sigma(z))\)</li>
+            </ol>
+            <div class="slide-number">Slide 4</div>
+        </div>
+
+        <!-- Slide 5: Gradient of Loss (Single Example) -->
+        <div class="slide">
+            <h2>Gradient of Loss (Single Example)</h2>
+            <p><strong>Loss for single example</strong>:</p>
+            <div class="math-box">
+                \[\ell^{(i)} = -\big[y^{(i)}\log\hat{y}^{(i)} + (1-y^{(i)})\log(1-\hat{y}^{(i)})\big]\]
+            </div>
+            
+            <p><strong>Chain rule application</strong>:</p>
+            <div class="math-box">
+                \[\frac{\partial \ell^{(i)}}{\partial w} = \frac{\partial \ell^{(i)}}{\partial \hat{y}^{(i)}}\cdot\frac{d\hat{y}^{(i)}}{dz^{(i)}}\cdot\frac{\partial z^{(i)}}{\partial w}\]
+            </div>
+            
+            <p><strong>Three factors</strong>:</p>
+            <ol>
+                <li>\(\frac{\partial \ell^{(i)}}{\partial \hat{y}^{(i)}} = -\Big(\frac{y^{(i)}}{\hat{y}^{(i)}} - \frac{1-y^{(i)}}{1-\hat{y}^{(i)}}\Big)\)</li>
+                <li>\(\frac{d\hat{y}^{(i)}}{dz^{(i)}} = \hat{y}^{(i)}(1-\hat{y}^{(i)})\)</li>
+                <li>\(\frac{\partial z^{(i)}}{\partial w} = x^{(i)}\) (vector)</li>
+            </ol>
+            <div class="slide-number">Slide 5</div>
+        </div>
+
+        <!-- Slide 6: Gradient Simplification -->
+        <div class="slide">
+            <h2>Gradient of Loss (Single Example) - Simplification</h2>
+            <p><strong>Combining the factors</strong>:</p>
+            <div class="math-box">
+                \[\frac{\partial \ell^{(i)}}{\partial w} = -\Big(\frac{y^{(i)}}{\hat{y}^{(i)}} - \frac{1-y^{(i)}}{1-\hat{y}^{(i)}}\Big)\cdot \hat{y}^{(i)}(1-\hat{y}^{(i)}) \cdot x^{(i)}\]
+            </div>
+            
+            <p><strong>Simplification</strong>:</p>
+            <div class="math-box">
+                \[\Big(\frac{y}{\hat{y}} - \frac{1-y}{1-\hat{y}}\Big)\hat{y}(1-\hat{y}) = y(1-\hat{y}) - (1-y)\hat{y} = y - \hat{y}\]
+            </div>
+            
+            <p><strong>Final result</strong>:</p>
+            <div class="boxed">
+                \[\nabla_w \ell^{(i)} = (\hat{y}^{(i)} - y^{(i)})\,x^{(i)}\]
+            </div>
+            
+            <p><strong>For bias</strong>:</p>
+            <div class="math-box">
+                \[\frac{\partial \ell^{(i)}}{\partial b} = \hat{y}^{(i)} - y^{(i)}\]
+            </div>
+            <div class="slide-number">Slide 6</div>
+        </div>
+
+        <!-- Slide 7: Gradient over Whole Dataset -->
+        <div class="slide">
+            <h2>Gradient over Whole Dataset</h2>
+            <p><strong>Average over all examples</strong>:</p>
+            <div class="math-box">
+                \[\nabla_w J(w,b) = \frac{1}{m}\sum_{i=1}^m (\hat{y}^{(i)} - y^{(i)})\,x^{(i)}\]
+                \[\frac{\partial J}{\partial b} = \frac{1}{m}\sum_{i=1}^m (\hat{y}^{(i)} - y^{(i)})\]
+            </div>
+            
+            <p><strong>Vectorized form</strong>:</p>
+            <ul>
+                <li>Let \(X\) be the \(m \times n\) data matrix (rows \(x^{(i)T}\))</li>
+                <li>Let \(\hat{y}\) and \(y\) be \(m\)-vectors</li>
+            </ul>
+            
+            <div class="math-box">
+                \[\nabla_w J = \frac{1}{m} X^\top(\hat{y}-y)\]
+                \[\frac{\partial J}{\partial b} = \frac{1}{m}\mathbf{1}^\top(\hat{y}-y)\]
+            </div>
+            <div class="slide-number">Slide 7</div>
+        </div>
+
+        <!-- Slide 8: Gradient Descent Update -->
+        <div class="slide">
+            <h2>Gradient Descent Update</h2>
+            <p><strong>With learning rate \(\alpha\)</strong>:</p>
+            <div class="math-box">
+                \[w \leftarrow w - \alpha \,\nabla_w J = w - \alpha\frac{1}{m}X^\top(\hat{y}-y)\]
+                \[b \leftarrow b - \alpha\frac{1}{m}\mathbf{1}^\top(\hat{y}-y)\]
+            </div>
+            
+            <div class="key-point">
+                <strong>Note</strong>: Bias can be included in the parameter vector by adding a constant feature of 1 to \(X\).
+            </div>
+            <div class="slide-number">Slide 8</div>
+        </div>
+
+        <!-- Slide 9: Regularization -->
+        <div class="slide">
+            <h2>Regularization (L2 Ridge)</h2>
+            <p><strong>Modified loss</strong> (don't regularize bias):</p>
+            <div class="math-box">
+                \[J_{\lambda}(w,b) = J(w,b) + \frac{\lambda}{2m}\, \|w\|^2\]
+            </div>
+            
+            <p><strong>Modified gradient</strong>:</p>
+            <div class="math-box">
+                \[\nabla_w J_{\lambda} = \frac{1}{m} X^\top(\hat{y}-y) + \frac{\lambda}{m}\, w\]
+            </div>
+            
+            <p><strong>Update rule</strong>:</p>
+            <div class="math-box">
+                \[w \leftarrow w - \alpha\left(\frac{1}{m} X^\top(\hat{y}-y) + \frac{\lambda}{m}w\right)\]
+            </div>
+            <div class="slide-number">Slide 9</div>
+        </div>
+
+        <!-- Slide 10: Newton's Method / IRLS -->
+        <div class="slide">
+            <h2>Newton's Method / IRLS</h2>
+            <p><strong>Hessian computation</strong>:</p>
+            <p>From single-example gradient \(\nabla_w \ell^{(i)} = (\hat{y}^{(i)} - y^{(i)})\,x^{(i)}\):</p>
+            <div class="math-box">
+                \[\nabla^2_w \ell^{(i)} = \hat{y}^{(i)}(1-\hat{y}^{(i)})\, x^{(i)}x^{(i)\top}\]
+            </div>
+            
+            <p><strong>Average Hessian</strong>:</p>
+            <div class="math-box">
+                \[H = \nabla^2_w J = \frac{1}{m}\sum_{i=1}^m \hat{y}^{(i)}(1-\hat{y}^{(i)})\, x^{(i)}x^{(i)\top}\]
+            </div>
+            
+            <p><strong>Matrix form</strong>:</p>
+            <ul>
+                <li>Define \(R\) as \(m \times m\) diagonal matrix with \(R_{ii} = \hat{y}^{(i)}(1-\hat{y}^{(i)})\)</li>
+                <li>Then: \(H = \frac{1}{m} X^\top R X\)</li>
+            </ul>
+            <div class="slide-number">Slide 10</div>
+        </div>
+
+        <!-- Slide 11: Newton's Method / IRLS (continued) -->
+        <div class="slide">
+            <h2>Newton's Method / IRLS (continued)</h2>
+            <p><strong>Newton update</strong>:</p>
+            <div class="math-box">
+                \[w \leftarrow w - H^{-1}\,\nabla_w J\]
+            </div>
+            
+            <p><strong>Iteratively Reweighted Least Squares (IRLS)</strong>:</p>
+            <ul>
+                <li>Each Newton step solves a weighted least squares problem</li>
+                <li>Uses weight matrix \(R\)</li>
+            </ul>
+            
+            <p><strong>With L2 regularization</strong>:</p>
+            <ul>
+                <li>Hessian becomes: \(H = \frac{1}{m} X^\top R X + \frac{\lambda}{m}I\)</li>
+                <li>Update: \(w \leftarrow w - H^{-1}\,\nabla_w J_{\lambda}\)</li>
+            </ul>
+            <div class="slide-number">Slide 11</div>
+        </div>
+
+        <!-- Slide 12: Training Algorithm -->
+        <div class="slide">
+            <h2>Training Algorithm</h2>
+            <ol>
+                <li><strong>Initialize</strong> \(w, b\) (e.g., zeros)</li>
+                <li><strong>Repeat until convergence</strong>:
+                    <ul>
+                        <li>Compute scores \(z = Xw + b\) (vector of length \(m\))</li>
+                        <li>Compute \(\hat{y} = \sigma(z)\) elementwise</li>
+                        <li>Compute gradient \(\nabla_w J = \frac{1}{m} X^\top(\hat{y}-y)\), and \(\frac{\partial J}{\partial b} = \frac{1}{m}\mathbf{1}^\top(\hat{y}-y)\)</li>
+                        <li>Update parameters:
+                            <ul>
+                                <li>\(w \leftarrow w - \alpha \nabla_w J\)</li>
+                                <li>\(b \leftarrow b - \alpha \frac{\partial J}{\partial b}\)</li>
+                            </ul>
+                        </li>
+                        <li>(Or compute Hessian \(H\) and take Newton step \(w \leftarrow w - H^{-1}\nabla_w J\))</li>
+                    </ul>
+                </li>
+                <li><strong>Stop</strong> when change in \(J\) or parameters is below tolerance or after fixed iterations</li>
+            </ol>
+            <div class="slide-number">Slide 12</div>
+        </div>
+
+        <!-- Slide 13: Multiclass Extension -->
+        <div class="slide">
+            <h2>Multiclass Extension (Softmax)</h2>
+            <p>For \(K\) classes, replace sigmoid with <strong>softmax</strong>:</p>
+            <div class="math-box">
+                \[p(y=k\mid x)=\frac{e^{w_k^\top x}}{\sum_{j=1}^K e^{w_j^\top x}}\]
+            </div>
+            
+            <p><strong>Gradient</strong> for class \(k\):</p>
+            <div class="math-box">
+                \[\nabla_{w_k} J = \frac{1}{m}X^\top\big(\hat{Y}_{(:,k)} - Y_{(:,k)}\big)\]
+            </div>
+            
+            <p>Where:</p>
+            <ul>
+                <li>\(\hat{Y}_{(:,k)}\) is the \(m\)-vector of predicted probabilities for class \(k\)</li>
+                <li>\(Y_{(:,k)}\) is the \(m\)-vector of binary indicators for class \(k\)</li>
+            </ul>
+            <div class="slide-number">Slide 13</div>
+        </div>
+
+        <!-- Slide 14: Summary -->
+        <div class="slide">
+            <h2>Summary</h2>
+            <div class="summary">
+                <h3>Key takeaways:</h3>
+                <ul>
+                    <li>Logistic regression models probability using sigmoid function</li>
+                    <li>Binary cross-entropy loss is derived from maximum likelihood principle</li>
+                    <li>Gradient has elegant form: \((\hat{y}^{(i)} - y^{(i)})x^{(i)}\) per example</li>
+                    <li>Optimization via gradient descent or Newton's method/IRLS</li>
+                    <li>Regularization easily incorporated</li>
+                    <li>Extends to multiclass via softmax</li>
+                </ul>
+                
+                <h3>Sanity check:</h3>
+                <p>The scalar form \(\nabla_w \ell^{(i)} = (\hat{y}^{(i)} - y^{(i)})x^{(i)}\) matches numeric updates, confirming the algebra matches the arithmetic.</p>
+            </div>
+            <div class="slide-number">Slide 14</div>
+        </div>
+
+        <!-- Slide 15: Interactive Sigmoid Function -->
+        <div class="slide">
+            <h2>Interactive Sigmoid Function</h2>
+            <p>Explore the sigmoid function \(\sigma(z) = \frac{1}{1+e^{-z}}\) interactively:</p>
+            
+            <div class="interactive-container">
+                <div class="slider-container">
+                    <label for="sigmoid-slider">Input value (z): <span id="sigmoid-value">0</span></label>
+                    <input type="range" min="-10" max="10" value="0" class="slider" id="sigmoid-slider">
+                </div>
+                
+                <div class="svg-container">
+                    <svg width="600" height="400" id="sigmoid-svg">
+                        <!-- Axes -->
+                        <line x1="50" y1="350" x2="550" y2="350" stroke="black" stroke-width="2" />
+                        <line x1="50" y1="50" x2="50" y2="350" stroke="black" stroke-width="2" />
+                        
+                        <!-- X-axis labels -->
+                        <text x="45" y="370" text-anchor="end">-10</text>
+                        <text x="300" y="370" text-anchor="middle">0</text>
+                        <text x="550" y="370" text-anchor="start">10</text>
+                        
+                        <!-- Y-axis labels -->
+                        <text x="40" y="355" text-anchor="end">0</text>
+                        <text x="40" y="205" text-anchor="end">0.5</text>
+                        <text x="40" y="55" text-anchor="end">1.0</text>
+                        
+                        <!-- Sigmoid curve -->
+                        <path id="sigmoid-curve" fill="none" stroke="#3498db" stroke-width="3" />
+                        
+                        <!-- Point on curve -->
+                        <circle id="sigmoid-point" cx="300" cy="200" r="6" fill="#e74c3c" />
+                        
+                        <!-- Tangent line -->
+                        <line id="tangent-line" x1="200" y1="200" x2="400" y2="200" stroke="#2ecc71" stroke-width="2" stroke-dasharray="5,3" />
+                        
+                        <!-- Labels -->
+                        <text x="300" y="30" text-anchor="middle" font-weight="bold">Sigmoid Function</text>
+                        <text x="300" y="390" text-anchor="middle">z</text>
+                        <text x="20" y="200" text-anchor="middle" transform="rotate(-90, 20, 200)">σ(z)</text>
+                    </svg>
+                </div>
+                
+                <div class="math-box">
+                    <p>Current value: \(\sigma(<span id="current-z">0</span>) = <span id="current-sigma">0.5</span>\)</p>
+                    <p>Derivative: \(\sigma'(<span id="current-z-2">0</span>) = <span id="current-derivative">0.25</span>\)</p>
+                </div>
+            </div>
+            
+            <div class="key-point">
+                <strong>Key property:</strong> The derivative of the sigmoid is largest at z=0 (where σ=0.5) and approaches 0 as z → ±∞.
+            </div>
+            <div class="slide-number">Slide 15</div>
+        </div>
+
+        <!-- Slide 16: Example Dataset -->
+        <div class="slide">
+            <h2>Example Dataset</h2>
+            <p>Let's work through a complete example with a small dataset:</p>
+            
+            <div class="example-box">
+                <h3>Dataset (3 examples, 2 features):</h3>
+                <table border="1" cellpadding="10" style="border-collapse: collapse; margin: 20px 0;">
+                    <tr>
+                        <th>Example</th>
+                        <th>x₁</th>
+                        <th>x₂</th>
+                        <th>y</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>2</td>
+                        <td>3</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>3</td>
+                        <td>2</td>
+                        <td>1</td>
+                    </tr>
+                </table>
+                
+                <h3>Initialization:</h3>
+                <p>Weight vector: \(w = [0, 0]\)</p>
+                <p>Bias: \(b = 0\)</p>
+                <p>Learning rate: \(\alpha = 0.1\)</p>
+            </div>
+            
+            <div class="svg-container">
+                <svg width="500" height="400" id="data-plot">
+                    <!-- Axes -->
+                    <line x1="50" y1="350" x2="450" y2="350" stroke="black" stroke-width="2" />
+                    <line x1="50" y1="50" x2="50" y2="350" stroke="black" stroke-width="2" />
+                    
+                    <!-- X-axis labels -->
+                    <text x="45" y="370" text-anchor="end">0</text>
+                    <text x="250" y="370" text-anchor="middle">2</text>
+                    <text x="450" y="370" text-anchor="start">4</text>
+                    
+                    <!-- Y-axis labels -->
+                    <text x="40" y="355" text-anchor="end">0</text>
+                    <text x="40" y="205" text-anchor="end">2</text>
+                    <text x="40" y="55" text-anchor="end">4</text>
+                    
+                    <!-- Data points -->
+                    <circle cx="150" cy="250" r="6" fill="#e74c3c" class="data-point" />
+                    <text x="160" y="245" font-size="12">(1,1)</text>
+                    
+                    <circle cx="250" cy="150" r="6" fill="#3498db" class="data-point" />
+                    <text x="260" y="145" font-size="12">(2,3)</text>
+                    
+                    <circle cx="350" cy="200" r="6" fill="#e74c3c" class="data-point" />
+                    <text x="360" y="195" font-size="12">(3,2)</text>
+                    
+                    <!-- Legend -->
+                    <circle cx="370" cy="70" r="6" fill="#e74c3c" />
+                    <text x="380" y="75" font-size="14">Class 1</text>
+                    
+                    <circle cx="370" cy="90" r="6" fill="#3498db" />
+                    <text x="380" y="95" font-size="14">Class 0</text>
+                    
+                    <!-- Initial decision boundary (vertical line at x=0) -->
+                    <line x1="50" y1="50" x2="50" y2="350" stroke="#2ecc71" stroke-width="2" stroke-dasharray="5,5" class="decision-boundary" />
+                    <text x="55" y="70" font-size="12" fill="#2ecc71">Initial boundary</text>
+                </svg>
+            </div>
+            <div class="slide-number">Slide 16</div>
+        </div>
+
+        <!-- Slide 17: Step-by-Step Calculation (Forward Pass) -->
+        <div class="slide">
+            <h2>Step-by-Step Calculation: Forward Pass</h2>
+            <p>Let's compute the linear scores and predictions for each example:</p>
+            
+            <div class="tab-container">
+                <div class="tab">
+                    <button class="tablinks active" onclick="openTab(event, 'example1')">Example 1</button>
+                    <button class="tablinks" onclick="openTab(event, 'example2')">Example 2</button>
+                    <button class="tablinks" onclick="openTab(event, 'example3')">Example 3</button>
+                </div>
+                
+                <div id="example1" class="tabcontent" style="display: block;">
+                    <h3>Example 1: x = [1, 1], y = 1</h3>
+                    <div class="step-box">
+                        <p><strong>Step 1:</strong> Compute linear score</p>
+                        <div class="calculation-step">
+                            \(z^{(1)} = w^T x^{(1)} + b = [0, 0] \cdot [1, 1] + 0 = 0\)
+                        </div>
+                        
+                        <p><strong>Step 2:</strong> Apply sigmoid function</p>
+                        <div class="calculation-step">
+                            \(\hat{y}^{(1)} = \sigma(z^{(1)}) = \sigma(0) = \frac{1}{1+e^{0}} = \frac{1}{2} = 0.5\)
+                        </div>
+                        
+                        <p><strong>Result:</strong> Prediction = 0.5 (True label = 1)</p>
+                    </div>
+                </div>
+                
+                <div id="example2" class="tabcontent">
+                    <h3>Example 2: x = [2, 3], y = 0</h3>
+                    <div class="step-box">
+                        <p><strong>Step 1:</strong> Compute linear score</p>
+                        <div class="calculation-step">
+                            \(z^{(2)} = w^T x^{(2)} + b = [0, 0] \cdot [2, 3] + 0 = 0\)
+                        </div>
+                        
+                        <p><strong>Step 2:</strong> Apply sigmoid function</p>
+                        <div class="calculation-step">
+                            \(\hat{y}^{(2)} = \sigma(z^{(2)}) = \sigma(0) = \frac{1}{1+e^{0}} = \frac{1}{2} = 0.5\)
+                        </div>
+                        
+                        <p><strong>Result:</strong> Prediction = 0.5 (True label = 0)</p>
+                    </div>
+                </div>
+                
+                <div id="example3" class="tabcontent">
+                    <h3>Example 3: x = [3, 2], y = 1</h3>
+                    <div class="step-box">
+                        <p><strong>Step 1:</strong> Compute linear score</p>
+                        <div class="calculation-step">
+                            \(z^{(3)} = w^T x^{(3)} + b = [0, 0] \cdot [3, 2] + 0 = 0\)
+                        </div>
+                        
+                        <p><strong>Step 2:</strong> Apply sigmoid function</p>
+                        <div class="calculation-step">
+                            \(\hat{y}^{(3)} = \sigma(z^{(3)}) = \sigma(0) = \frac{1}{1+e^{0}} = \frac{1}{2} = 0.5\)
+                        </div>
+                        
+                        <p><strong>Result:</strong> Prediction = 0.5 (True label = 1)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="key-point">
+                <strong>Observation:</strong> With initial parameters w=[0,0] and b=0, all examples have the same prediction (0.5) regardless of their features.
+            </div>
+            <div class="slide-number">Slide 17</div>
+        </div>
+
+        <!-- Slide 18: Step-by-Step Calculation (Loss) -->
+        <div class="slide">
+            <h2>Step-by-Step Calculation: Loss</h2>
+            <p>Now let's compute the loss for each example and the total loss:</p>
+            
+            <div class="step-box">
+                <h3>Loss for Example 1 (y=1, ŷ=0.5):</h3>
+                <div class="calculation-step">
+                    \(\ell^{(1)} = -[y^{(1)}\log\hat{y}^{(1)} + (1-y^{(1)})\log(1-\hat{y}^{(1)})]\)
+                </div>
+                <div class="calculation-step">
+                    \(= -[1 \cdot \log(0.5) + (1-1) \cdot \log(1-0.5)]\)
+                </div>
+                <div class="calculation-step">
+                    \(= -[\log(0.5) + 0] = -\log(0.5) = -(-0.693) = 0.693\)
+                </div>
+            </div>
+            
+            <div class="step-box">
+                <h3>Loss for Example 2 (y=0, ŷ=0.5):</h3>
+                <div class="calculation-step">
+                    \(\ell^{(2)} = -[y^{(2)}\log\hat{y}^{(2)} + (1-y^{(2)})\log(1-\hat{y}^{(2)})]\)
+                </div>
+                <div class="calculation-step">
+                    \(= -[0 \cdot \log(0.5) + (1-0) \cdot \log(1-0.5)]\)
+                </div>
+                <div class="calculation-step">
+                    \(= -[0 + \log(0.5)] = -\log(0.5) = -(-0.693) = 0.693\)
+                </div>
+            </div>
+            
+            <div class="step-box">
+                <h3>Loss for Example 3 (y=1, ŷ=0.5):</h3>
+                <div class="calculation-step">
+                    \(\ell^{(3)} = -[y^{(3)}\log\hat{y}^{(3)} + (1-y^{(3)})\log(1-\hat{y}^{(3)})]\)
+                </div>
+                <div class="calculation-step">
+                    \(= -[1 \cdot \log(0.5) + (1-1) \cdot \log(1-0.5)]\)
+                </div>
+                <div class="calculation-step">
+                    \(= -[\log(0.5) + 0] = -\log(0.5) = -(-0.693) = 0.693\)
+                </div>
+            </div>
+            
+            <div class="math-box">
+                <h3>Total Loss:</h3>
+                <div class="calculation-step">
+                    \(J(w,b) = \frac{1}{3} \sum_{i=1}^3 \ell^{(i)} = \frac{1}{3}(0.693 + 0.693 + 0.693) = \frac{1}{3}(2.079) = 0.693\)
+                </div>
+            </div>
+            
+            <div class="key-point">
+                <strong>Key insight:</strong> When the model predicts 0.5 for all examples (maximum uncertainty), the loss is -log(0.5) ≈ 0.693 per example.
+            </div>
+            <div class="slide-number">Slide 18</div>
+        </div>
+
+        <!-- Slide 19: Step-by-Step Calculation (Gradient) -->
+        <div class="slide">
+            <h2>Step-by-Step Calculation: Gradient</h2>
+            <p>Now let's compute the gradient for each example and the average gradient:</p>
+            
+            <div class="step-box">
+                <h3>Gradient for Example 1 (x=[1,1], y=1, ŷ=0.5):</h3>
+                <div class="calculation-step">
+                    \(\nabla_w \ell^{(1)} = (\hat{y}^{(1)} - y^{(1)})x^{(1)} = (0.5 - 1)[1, 1] = (-0.5)[1, 1] = [-0.5, -0.5]\)
+                </div>
+                <div class="calculation-step">
+                    \(\frac{\partial \ell^{(1)}}{\partial b} = \hat{y}^{(1)} - y^{(1)} = 0.5 - 1 = -0.5\)
+                </div>
+            </div>
+            
+            <div class="step-box">
+                <h3>Gradient for Example 2 (x=[2,3], y=0, ŷ=0.5):</h3>
+                <div class="calculation-step">
+                    \(\nabla_w \ell^{(2)} = (\hat{y}^{(2)} - y^{(2)})x^{(2)} = (0.5 - 0)[2, 3] = (0.5)[2, 3] = [1.0, 1.5]\)
+                </div>
+                <div class="calculation-step">
+                    \(\frac{\partial \ell^{(2)}}{\partial b} = \hat{y}^{(2)} - y^{(2)} = 0.5 - 0 = 0.5\)
+                </div>
+            </div>
+            
+            <div class="step-box">
+                <h3>Gradient for Example 3 (x=[3,2], y=1, ŷ=0.5):</h3>
+                <div class="calculation-step">
+                    \(\nabla_w \ell^{(3)} = (\hat{y}^{(3)} - y^{(3)})x^{(3)} = (0.5 - 1)[3, 2] = (-0.5)[3, 2] = [-1.5, -1.0]\)
+                </div>
+                <div class="calculation-step">
+                    \(\frac{\partial \ell^{(3)}}{\partial b} = \hat{y}^{(3)} - y^{(3)} = 0.5 - 1 = -0.5\)
+                </div>
+            </div>
+            
+            <div class="math-box">
+                <h3>Average Gradient:</h3>
+                <div class="calculation-step">
+                    \(\nabla_w J = \frac{1}{3} \sum_{i=1}^3 \nabla_w \ell^{(i)} = \frac{1}{3}([-0.5, -0.5] + [1.0, 1.5] + [-1.5, -1.0])\)
+                </div>
+                <div class="calculation-step">
+                    \(= \frac{1}{3}([-0.5+1.0-1.5, -0.5+1.5-1.0]) = \frac{1}{3}([-1.0, 0.0]) = [-0.333, 0.0]\)
+                </div>
+                <div class="calculation-step">
+                    \(\frac{\partial J}{\partial b} = \frac{1}{3} \sum_{i=1}^3 \frac{\partial \ell^{(i)}}{\partial b} = \frac{1}{3}(-0.5 + 0.5 - 0.5) = \frac{1}{3}(-0.5) = -0.167\)
+                </div>
+            </div>
+            
+            <div class="svg-container">
+                <svg width="500" height="300" id="gradient-plot">
+                    <!-- Axes -->
+                    <line x1="50" y1="250" x2="450" y2="250" stroke="black" stroke-width="2" />
+                    <line x1="50" y1="50" x2="50" y2="250" stroke="black" stroke-width="2" />
+                    
+                    <!-- X-axis labels -->
+                    <text x="45" y="270" text-anchor="end">-2</text>
+                    <text x="250" y="270" text-anchor="middle">0</text>
+                    <text x="450" y="270" text-anchor="start">2</text>
+                    
+                    <!-- Y-axis labels -->
+                    <text x="40" y="255" text-anchor="end">-1</text>
+                    <text x="40" y="150" text-anchor="end">0</text>
+                    <text x="40" y="55" text-anchor="end">1</text>
+                    
+                    <!-- Gradient vectors -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#9b59b6" />
+                        </marker>
+                    </defs>
+                    
+                    <!-- Example 1 gradient -->
+                    <line x1="150" y1="150" x2="100" y2="100" class="gradient-arrow" />
+                    <text x="80" y="90" font-size="12" fill="#9b59b6">∇ℓ⁽¹⁾</text>
+                    
+                    <!-- Example 2 gradient -->
+                    <line x1="250" y1="150" x2="350" y2="50" class="gradient-arrow" />
+                    <text x="360" y="45" font-size="12" fill="#9b59b6">∇ℓ⁽²⁾</text>
+                    
+                    <!-- Example 3 gradient -->
+                    <line x1="350" y1="150" x2="200" y2="100" class="gradient-arrow" />
+                    <text x="180" y="90" font-size="12" fill="#9b59b6">∇ℓ⁽³⁾</text>
+                    
+                    <!-- Average gradient -->
+                    <line x1="250" y1="150" x2="200" y2="150" class="gradient-arrow" stroke="#e74c3c" />
+                    <text x="170" y="145" font-size="12" fill="#e74c3c">∇J</text>
+                    
+                    <!-- Labels -->
+                    <text x="250" y="30" text-anchor="middle" font-weight="bold">Gradient Vectors</text>
+                    <text x="250" y="290" text-anchor="middle">w₁</text>
+                    <text x="20" y="150" text-anchor="middle" transform="rotate(-90, 20, 150)">w₂</text>
+                </svg>
+            </div>
+            <div class="slide-number">Slide 19</div>
+        </div>
+
+        <!-- Slide 20: Step-by-Step Calculation (Update) -->
+        <div class="slide">
+            <h2>Step-by-Step Calculation: Parameter Update</h2>
+            <p>Now let's update the parameters using gradient descent with learning rate α=0.1:</p>
+            
+            <div class="step-box">
+                <h3>Current Parameters:</h3>
+                <div class="calculation-step">
+                    \(w = [0, 0]\)
+                </div>
+                <div class="calculation-step">
+                    \(b = 0\)
+                </div>
+            </div>
+            
+            <div class="step-box">
+                <h3>Gradient:</h3>
+                <div class="calculation-step">
+                    \(\nabla_w J = [-0.333, 0.0]\)
+                </div>
+                <div class="calculation-step">
+                    \(\frac{\partial J}{\partial b} = -0.167\)
+                </div>
+            </div>
+            
+            <div class="step-box">
+                <h3>Update Equations:</h3>
+                <div class="calculation-step">
+                    \(w \leftarrow w - \alpha \nabla_w J\)
+                </div>
+                <div class="calculation-step">
+                    \(b \leftarrow b - \alpha \frac{\partial J}{\partial b}\)
+                </div>
+            </div>
+            
+            <div class="step-box">
+                <h3>New Parameters:</h3>
+                <div class="calculation-step">
+                    \(w_{new} = [0, 0] - 0.1 \cdot [-0.333, 0.0] = [0, 0] - [-0.0333, 0.0] = [0.0333, 0.0]\)
+                </div>
+                <div class="calculation-step">
+                    \(b_{new} = 0 - 0.1 \cdot (-0.167) = 0 + 0.0167 = 0.0167\)
+                </div>
+            </div>
+            
+            <div class="svg-container">
+                <svg width="500" height="400" id="update-plot">
+                    <!-- Axes -->
+                    <line x1="50" y1="350" x2="450" y2="350" stroke="black" stroke-width="2" />
+                    <line x1="50" y1="50" x2="50" y2="350" stroke="black" stroke-width="2" />
+                    
+                    <!-- X-axis labels -->
+                    <text x="45" y="370" text-anchor="end">0</text>
+                    <text x="250" y="370" text-anchor="middle">2</text>
+                    <text x="450" y="370" text-anchor="start">4</text>
+                    
+                    <!-- Y-axis labels -->
+                    <text x="40" y="355" text-anchor="end">0</text>
+                    <text x="40" y="205" text-anchor="end">2</text>
+                    <text x="40" y="55" text-anchor="end">4</text>
+                    
+                    <!-- Data points -->
+                    <circle cx="150" cy="250" r="6" fill="#e74c3c" class="data-point" />
+                    <circle cx="250" cy="150" r="6" fill="#3498db" class="data-point" />
+                    <circle cx="350" cy="200" r="6" fill="#e74c3c" class="data-point" />
+                    
+                    <!-- Initial decision boundary -->
+                    <line x1="50" y1="50" x2="50" y2="350" stroke="#2ecc71" stroke-width="2" stroke-dasharray="5,5" class="decision-boundary" />
+                    <text x="55" y="70" font-size="12" fill="#2ecc71">Initial</text>
+                    
+                    <!-- Updated decision boundary -->
+                    <line x1="60" y1="50" x2="60" y2="350" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5" class="decision-boundary" />
+                    <text x="65" y="70" font-size="12" fill="#e74c3c">Updated</text>
+                    
+                    <!-- Update arrow -->
+                    <defs>
+                        <marker id="update-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#f39c12" />
+                        </marker>
+                    </defs>
+                    <line x1="50" y1="200" x2="60" y2="200" stroke="#f39c12" stroke-width="3" marker-end="url(#update-arrow)" />
+                    <text x="55" y="190" text-anchor="middle" font-size="12" fill="#f39c12">Update</text>
+                </svg>
+            </div>
+            
+            <div class="key-point">
+                <strong>Observation:</strong> The decision boundary has shifted slightly to the right (from x=0 to x≈0.0333), moving closer to the class 1 points.
+            </div>
+            <div class="slide-number">Slide 20</div>
+        </div>
+
+        <!-- Slide 21: Interactive Decision Boundary -->
+        <div class="slide">
+            <h2>Interactive Decision Boundary</h2>
+            <p>Explore how the decision boundary changes as you adjust the parameters:</p>
+            
+            <div class="interactive-container">
+                <div class="slider-container">
+                    <label for="w1-slider">Weight w₁: <span id="w1-value">0.033</span></label>
+                    <input type="range" min="-1" max="1" step="0.01" value="0.033" class="slider" id="w1-slider">
+                </div>
+                
+                <div class="slider-container">
+                    <label for="w2-slider">Weight w₂: <span id="w2-value">0.0</span></label>
+                    <input type="range" min="-1" max="1" step="0.01" value="0.0" class="slider" id="w2-slider">
+                </div>
+                
+                <div class="slider-container">
+                    <label for="b-slider">Bias b: <span id="b-value">0.017</span></label>
+                    <input type="range" min="-1" max="1" step="0.01" value="0.017" class="slider" id="b-slider">
+                </div>
+                
+                <div class="svg-container">
+                    <svg width="600" height="400" id="boundary-svg">
+                        <!-- Axes -->
+                        <line x1="50" y1="350" x2="550" y2="350" stroke="black" stroke-width="2" />
+                        <line x1="50" y1="50" x2="50" y2="350" stroke="black" stroke-width="2" />
+                        
+                        <!-- X-axis labels -->
+                        <text x="45" y="370" text-anchor="end">0</text>
+                        <text x="300" y="370" text-anchor="middle">2</text>
+                        <text x="550" y="370" text-anchor="start">4</text>
+                        
+                        <!-- Y-axis labels -->
+                        <text x="40" y="355" text-anchor="end">0</text>
+                        <text x="40" y="205" text-anchor="end">2</text>
+                        <text x="40" y="55" text-anchor="end">4</text>
+                        
+                        <!-- Data points -->
+                        <circle cx="200" cy="250" r="6" fill="#e74c3c" class="data-point" />
+                        <circle cx="300" cy="150" r="6" fill="#3498db" class="data-point" />
+                        <circle cx="400" cy="200" r="6" fill="#e74c3c" class="data-point" />
+                        
+                        <!-- Decision boundary -->
+                        <line id="decision-line" x1="50" y1="200" x2="550" y2="200" stroke="#e74c3c" stroke-width="3" />
+                        
+                        <!-- Probability contours -->
+                        <path id="prob-contour-0.9" fill="none" stroke="#e74c3c" stroke-width="1" stroke-dasharray="3,3" opacity="0.7" />
+                        <path id="prob-contour-0.7" fill="none" stroke="#e74c3c" stroke-width="1" stroke-dasharray="3,3" opacity="0.5" />
+                        <path id="prob-contour-0.3" fill="none" stroke="#3498db" stroke-width="1" stroke-dasharray="3,3" opacity="0.5" />
+                        <path id="prob-contour-0.1" fill="none" stroke="#3498db" stroke-width="1" stroke-dasharray="3,3" opacity="0.7" />
+                        
+                        <!-- Labels -->
+                        <text x="300" y="30" text-anchor="middle" font-weight="bold">Decision Boundary</text>
+                        <text x="300" y="390" text-anchor="middle">x₁</text>
+                        <text x="20" y="200" text-anchor="middle" transform="rotate(-90, 20, 200)">x₂</text>
+                        
+                        <!-- Legend -->
+                        <circle cx="470" cy="70" r="6" fill="#e74c3c" />
+                        <text x="480" y="75" font-size="14">Class 1</text>
+                        
+                        <circle cx="470" cy="90" r="6" fill="#3498db" />
+                        <text x="480" y="95" font-size="14">Class 0</text>
+                        
+                        <line x1="460" y1="110" x2="480" y2="110" stroke="#e74c3c" stroke-width="3" />
+                        <text x="485" y="115" font-size="14">Decision</text>
+                        
+                        <line x1="460" y1="130" x2="480" y2="130" stroke="#e74c3c" stroke-width="1" stroke-dasharray="3,3" />
+                        <text x="485" y="135" font-size="14">P(y=1)=0.9</text>
+                        
+                        <line x1="460" y1="150" x2="480" y2="150" stroke="#3498db" stroke-width="1" stroke-dasharray="3,3" />
+                        <text x="485" y="155" font-size="14">P(y=1)=0.1</text>
+                    </svg>
+                </div>
+                
+                <div class="math-box">
+                    <p>Current parameters: w = [<span id="current-w1">0.033</span>, <span id="current-w2">0.0</span>], b = <span id="current-b">0.017</span></p>
+                    <p>Decision boundary equation: <span id="boundary-equation">0.033x₁ + 0.0x₂ + 0.017 = 0</span></p>
+                </div>
+            </div>
+            
+            <div class="key-point">
+                <strong>Key insight:</strong> The decision boundary is where the linear score equals zero (z=0), which corresponds to a probability of 0.5.
+            </div>
+            <div class="slide-number">Slide 21</div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize MathJax
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+
+        // Tab functionality
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // Sigmoid function
+        function sigmoid(z) {
+            return 1 / (1 + Math.exp(-z));
+        }
+
+        // Sigmoid derivative
+        function sigmoidDerivative(z) {
+            const s = sigmoid(z);
+            return s * (1 - s);
+        }
+
+        // Initialize sigmoid plot
+        function initSigmoidPlot() {
+            const slider = document.getElementById('sigmoid-slider');
+            const valueDisplay = document.getElementById('sigmoid-value');
+            const currentZ = document.getElementById('current-z');
+            const currentZ2 = document.getElementById('current-z-2');
+            const currentSigma = document.getElementById('current-sigma');
+            const currentDerivative = document.getElementById('current-derivative');
+            const point = document.getElementById('sigmoid-point');
+            const tangentLine = document.getElementById('tangent-line');
+            const curve = document.getElementById('sigmoid-curve');
+            
+            // Generate sigmoid curve
+            let pathData = "M";
+            for (let x = -10; x <= 10; x += 0.1) {
+                const y = sigmoid(x);
+                const svgX = 50 + (x + 10) * 25;
+                const svgY = 350 - y * 300;
+                pathData += `${svgX},${svgY} `;
+            }
+            curve.setAttribute('d', pathData);
+            
+            // Update function
+            function updateSigmoid() {
+                const z = parseFloat(slider.value);
+                valueDisplay.textContent = z.toFixed(1);
+                currentZ.textContent = z.toFixed(1);
+                currentZ2.textContent = z.toFixed(1);
+                
+                const sigma = sigmoid(z);
+                currentSigma.textContent = sigma.toFixed(3);
+                
+                const derivative = sigmoidDerivative(z);
+                currentDerivative.textContent = derivative.toFixed(3);
+                
+                // Update point position
+                const svgX = 50 + (z + 10) * 25;
+                const svgY = 350 - sigma * 300;
+                point.setAttribute('cx', svgX);
+                point.setAttribute('cy', svgY);
+                
+                // Update tangent line
+                const tangentLength = 100;
+                const tangentX1 = svgX - tangentLength;
+                const tangentX2 = svgX + tangentLength;
+                const tangentY1 = svgY - derivative * tangentLength * 300;
+                const tangentY2 = svgY + derivative * tangentLength * 300;
+                
+                tangentLine.setAttribute('x1', tangentX1);
+                tangentLine.setAttribute('y1', tangentY1);
+                tangentLine.setAttribute('x2', tangentX2);
+                tangentLine.setAttribute('y2', tangentY2);
+            }
+            
+            slider.addEventListener('input', updateSigmoid);
+            updateSigmoid();
+        }
+
+        // Initialize decision boundary plot
+        function initBoundaryPlot() {
+            const w1Slider = document.getElementById('w1-slider');
+            const w2Slider = document.getElementById('w2-slider');
+            const bSlider = document.getElementById('b-slider');
+            
+            const w1Value = document.getElementById('w1-value');
+            const w2Value = document.getElementById('w2-value');
+            const bValue = document.getElementById('b-value');
+            
+            const currentW1 = document.getElementById('current-w1');
+            const currentW2 = document.getElementById('current-w2');
+            const currentB = document.getElementById('current-b');
+            
+            const boundaryEquation = document.getElementById('boundary-equation');
+            const decisionLine = document.getElementById('decision-line');
+            
+            const probContour09 = document.getElementById('prob-contour-0.9');
+            const probContour07 = document.getElementById('prob-contour-0.7');
+            const probContour03 = document.getElementById('prob-contour-0.3');
+            const probContour01 = document.getElementById('prob-contour-0.1');
+            
+            // Update function
+            function updateBoundary() {
+                const w1 = parseFloat(w1Slider.value);
+                const w2 = parseFloat(w2Slider.value);
+                const b = parseFloat(bSlider.value);
+                
+                w1Value.textContent = w1.toFixed(3);
+                w2Value.textContent = w2.toFixed(3);
+                bValue.textContent = b.toFixed(3);
+                
+                currentW1.textContent = w1.toFixed(3);
+                currentW2.textContent = w2.toFixed(3);
+                currentB.textContent = b.toFixed(3);
+                
+                boundaryEquation.textContent = `${w1.toFixed(3)}x₁ + ${w2.toFixed(3)}x₂ + ${b.toFixed(3)} = 0`;
+                
+                // Update decision boundary
+                // For simplicity, we'll assume w2 != 0 and solve for x2: x2 = (-w1*x1 - b)/w2
+                if (Math.abs(w2) > 0.001) {
+                    const x1_0 = 0;
+                    const x2_0 = (-w1 * x1_0 - b) / w2;
+                    const svgX1_0 = 50 + x1_0 * 125;
+                    const svgY1_0 = 350 - x2_0 * 125;
+                    
+                    const x1_4 = 4;
+                    const x2_4 = (-w1 * x1_4 - b) / w2;
+                    const svgX1_4 = 50 + x1_4 * 125;
+                    const svgY1_4 = 350 - x2_4 * 125;
+                    
+                    decisionLine.setAttribute('x1', svgX1_0);
+                    decisionLine.setAttribute('y1', svgY1_0);
+                    decisionLine.setAttribute('x2', svgX1_4);
+                    decisionLine.setAttribute('y2', svgY1_4);
+                } else {
+                    // Vertical line when w2 = 0: x1 = -b/w1
+                    const x1 = -b / w1;
+                    const svgX = 50 + x1 * 125;
+                    
+                    decisionLine.setAttribute('x1', svgX);
+                    decisionLine.setAttribute('y1', 50);
+                    decisionLine.setAttribute('x2', svgX);
+                    decisionLine.setAttribute('y2', 350);
+                }
+                
+                // Update probability contours
+                updateProbabilityContours(w1, w2, b);
+            }
+            
+            function updateProbabilityContours(w1, w2, b) {
+                // For each probability level, generate a contour line
+                const contours = [
+                    { level: 0.9, element: probContour09, color: '#e74c3c' },
+                    { level: 0.7, element: probContour07, color: '#e74c3c' },
+                    { level: 0.3, element: probContour03, color: '#3498db' },
+                    { level: 0.1, element: probContour01, color: '#3498db' }
+                ];
+                
+                contours.forEach(contour => {
+                    const p = contour.level;
+                    // Find z such that sigmoid(z) = p
+                    const z = Math.log(p / (1 - p));
+                    
+                    // Generate contour line: w1*x1 + w2*x2 + b = z
+                    let pathData = "M";
+                    
+                    if (Math.abs(w2) > 0.001) {
+                        for (let x1 = 0; x1 <= 4; x1 += 0.1) {
+                            const x2 = (z - w1 * x1 - b) / w2;
+                            if (x2 >= 0 && x2 <= 4) {
+                                const svgX = 50 + x1 * 125;
+                                const svgY = 350 - x2 * 125;
+                                pathData += `${svgX},${svgY} `;
+                            }
+                        }
+                    } else {
+                        // Vertical line when w2 = 0
+                        const x1 = (z - b) / w1;
+                        if (x1 >= 0 && x1 <= 4) {
+                            const svgX = 50 + x1 * 125;
+                            pathData += `${svgX},50 ${svgX},350 `;
+                        }
+                    }
+                    
+                    contour.element.setAttribute('d', pathData);
+                    contour.element.setAttribute('stroke', contour.color);
+                });
+            }
+            
+            w1Slider.addEventListener('input', updateBoundary);
+            w2Slider.addEventListener('input', updateBoundary);
+            bSlider.addEventListener('input', updateBoundary);
+            
+            updateBoundary();
+        }
+
+        // Initialize all interactive elements when the page loads
+        window.addEventListener('load', function() {
+            initSigmoidPlot();
+            initBoundaryPlot();
+        });
+    </script>
+</body>
+</html>
