@@ -1,0 +1,2159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probability in Machine Learning - Complete Presentation</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            overflow: hidden;
+        }
+        
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            overflow-y: auto;
+        }
+        
+        .slide.active {
+            opacity: 1;
+            z-index: 1;
+        }
+        
+        .slide h1 {
+            font-size: 3em;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .slide h2 {
+            font-size: 2.2em;
+            margin-bottom: 20px;
+            color: #fff;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .slide h3 {
+            font-size: 1.6em;
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+        
+        .concept-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            backdrop-filter: blur(5px);
+            border-left: 5px solid #3498db;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .ml-box {
+            background: rgba(46, 204, 113, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid #e74c3c;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .theorem-box {
+            background: rgba(231, 76, 60, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid #e74c3c;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .example-box {
+            background: rgba(52, 152, 219, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .formula {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-size: 1.3em;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .highlight {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        
+        .grid-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .three-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .icon-box {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .icon-box i {
+            font-size: 28px;
+            margin-right: 15px;
+            color: #3498db;
+        }
+        
+        .title-slide {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .title-slide h1 {
+            font-size: 4em;
+            margin-bottom: 30px;
+        }
+        
+        .title-slide p {
+            font-size: 1.3em;
+            max-width: 800px;
+        }
+        
+        .ml-algorithm {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .ml-algorithm i {
+            font-size: 32px;
+            margin-right: 20px;
+            color: #e74c3c;
+        }
+        
+        .ml-algorithm h4 {
+            margin: 0;
+            color: #e74c3c;
+            font-size: 1.4em;
+        }
+        
+        .ml-algorithm p {
+            margin: 8px 0 0 0;
+            font-size: 1em;
+        }
+        
+        .distribution-visual {
+            height: 200px;
+            margin: 20px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .bar {
+            width: 40px;
+            background: #3498db;
+            border-radius: 5px 5px 0 0;
+            transition: height 0.5s ease;
+            margin: 0 3px;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            z-index: 100;
+        }
+        
+        .nav-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+        
+        .slide-counter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            z-index: 100;
+        }
+        
+        .toc {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 300px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 100;
+            display: none;
+        }
+        
+        .toc.active {
+            display: block;
+        }
+        
+        .toc h3 {
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+        
+        .toc ul {
+            list-style-type: none;
+            columns: 2;
+            column-gap: 20px;
+        }
+        
+        .toc li {
+            margin-bottom: 8px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+        
+        .toc li:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .toc-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 101;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .three-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .slide {
+                padding: 20px;
+            }
+            
+            .slide h1 {
+                font-size: 2.5em;
+            }
+            
+            .slide h2 {
+                font-size: 1.8em;
+            }
+            
+            .toc {
+                width: 250px;
+            }
+            
+            .toc ul {
+                columns: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <!-- Table of Contents -->
+        <button class="toc-toggle" onclick="toggleTOC()"><i class="fas fa-bars"></i></button>
+        <div class="toc" id="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <li onclick="goToSlide(0)">Title</li>
+                <li onclick="goToSlide(1)">What is Machine Learning?</li>
+                <li onclick="goToSlide(2)">Types of Machine Learning</li>
+                <li onclick="goToSlide(3)">Why Probability in ML?</li>
+                <li onclick="goToSlide(4)">Sample Space & Events</li>
+                <li onclick="goToSlide(5)">Probability Axioms</li>
+                <li onclick="goToSlide(6)">Corollaries of Axioms</li>
+                <li onclick="goToSlide(7)">Discrete Uniform Law</li>
+                <li onclick="goToSlide(8)">Conditional Probability</li>
+                <li onclick="goToSlide(9)">Multiplication Rule</li>
+                <li onclick="goToSlide(10)">Total Probability Theorem</li>
+                <li onclick="goToSlide(11)">Bayes' Rule</li>
+                <li onclick="goToSlide(12)">Independence</li>
+                <li onclick="goToSlide(13)">Conditional Independence</li>
+                <li onclick="goToSlide(14)">Counting Principles</li>
+                <li onclick="goToSlide(15)">Permutations</li>
+                <li onclick="goToSlide(16)">Combinations</li>
+                <li onclick="goToSlide(17)">Partitions</li>
+                <li onclick="goToSlide(18)">Random Variables</li>
+                <li onclick="goToSlide(19)">Probability Mass Function</li>
+                <li onclick="goToSlide(20)">Bernoulli RV</li>
+                <li onclick="goToSlide(21)">Discrete Uniform RV</li>
+                <li onclick="goToSlide(22)">Binomial RV</li>
+                <li onclick="goToSlide(23)">Geometric RV</li>
+                <li onclick="goToSlide(24)">Expectation</li>
+                <li onclick="goToSlide(25)">Variance</li>
+                <li onclick="goToSlide(26)">Expected Value Rule</li>
+                <li onclick="goToSlide(27)">Conditioning on Event</li>
+                <li onclick="goToSlide(28)">Total Expectation</li>
+                <li onclick="goToSlide(29)">Memorylessness of Geometric</li>
+                <li onclick="goToSlide(30)">Multiple Discrete RVs</li>
+                <li onclick="goToSlide(31)">Functions of Multiple RVs</li>
+                <li onclick="goToSlide(32)">Linearity of Expectation</li>
+                <li onclick="goToSlide(33)">Conditioning on RV</li>
+                <li onclick="goToSlide(34)">Conditional Expectation</li>
+                <li onclick="goToSlide(35)">Total Probability for RVs</li>
+                <li onclick="goToSlide(36)">Independence of RVs</li>
+                <li onclick="goToSlide(37)">Continuous RVs</li>
+                <li onclick="goToSlide(38)">Normal RV</li>
+                <li onclick="goToSlide(39)">Covariance & Correlation</li>
+                <li onclick="goToSlide(40)">Convergence Theorems</li>
+                <li onclick="goToSlide(41)">ML Algorithms</li>
+                <li onclick="goToSlide(42)">Summary</li>
+            </ul>
+        </div>
+        
+        <div class="slide-counter" id="slide-counter">1 / 43</div>
+        
+        <!-- Slide 1: Title -->
+        <div class="slide active" id="slide-0">
+            <div class="title-slide">
+                <h1>Probability in Machine Learning</h1>
+                <p>A Comprehensive Guide to Uncertainty and Data</p>
+                <p style="margin-top: 40px; font-size: 1.2em;">Based on "Probability – The Science of Uncertainty and Data" by Fabián Kozynski</p>
+            </div>
+        </div>
+        
+        <!-- Slide 2: What is Machine Learning? -->
+        <div class="slide" id="slide-1">
+            <h2>What is Machine Learning?</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>Machine Learning is a field of computer science that gives computers the ability to learn without being explicitly programmed.</p>
+                <div class="icon-box">
+                    <i class="fas fa-robot"></i>
+                    <div>
+                        <p>ML algorithms build mathematical models based on sample data, known as "training data", in order to make predictions or decisions without being explicitly programmed to perform the task.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>Key Characteristics</h3>
+                <div class="icon-box">
+                    <i class="fas fa-cogs"></i>
+                    <div>
+                        <ul>
+                            <li><span class="highlight">Learning from data</span> rather than explicit instructions</li>
+                            <li><span class="highlight">Improving performance</span> with experience</li>
+                            <li><span class="highlight">Adapting to new inputs</span> and making decisions</li>
+                            <li><span class="highlight">Generalizing from examples</span> to unseen situations</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 3: Types of Machine Learning -->
+        <div class="slide" id="slide-2">
+            <h2>Types of Machine Learning</h2>
+            
+            <div class="grid-container">
+                <div class="grid-item">
+                    <h3>Supervised Learning</h3>
+                    <p>Learning from labeled training data</p>
+                    <div class="icon-box">
+                        <i class="fas fa-graduation-cap"></i>
+                        <div>
+                            <ul>
+                                <li><span class="highlight">Classification</span>: Predict discrete labels</li>
+                                <li><span class="highlight">Regression</span>: Predict continuous values</li>
+                                <li>Examples: Spam detection, price prediction</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid-item">
+                    <h3>Unsupervised Learning</h3>
+                    <p>Learning from unlabeled data</p>
+                    <div class="icon-box">
+                        <i class="fas fa-search"></i>
+                        <div>
+                            <ul>
+                                <li><span class="highlight">Clustering</span>: Group similar data points</li>
+                                <li><span class="highlight">Dimensionality reduction</span>: Reduce features</li>
+                                <li>Examples: Customer segmentation, anomaly detection</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-container">
+                <div class="grid-item">
+                    <h3>Reinforcement Learning</h3>
+                    <p>Learning through trial and error</p>
+                    <div class="icon-box">
+                        <i class="fas fa-gamepad"></i>
+                        <div>
+                            <ul>
+                                <li><span class="highlight">Agent</span> takes actions in environment</li>
+                                <li><span class="highlight">Rewards</span> for good actions, penalties for bad</li>
+                                <li>Examples: Game playing, robotics, self-driving cars</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid-item">
+                    <h3>Semi-supervised Learning</h3>
+                    <p>Combination of labeled and unlabeled data</p>
+                    <div class="icon-box">
+                        <i class="fas fa-balance-scale"></i>
+                        <div>
+                            <ul>
+                                <li><span class="highlight">Small labeled dataset</span> + large unlabeled dataset</li>
+                                <li><span class="highlight">Leverages both</span> for better performance</li>
+                                <li>Examples: Medical image analysis, speech recognition</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 4: Why Probability in ML? -->
+        <div class="slide" id="slide-3">
+            <h2>Why Probability in Machine Learning?</h2>
+            
+            <div class="concept-box">
+                <h3>Uncertainty is Inherent</h3>
+                <div class="icon-box">
+                    <i class="fas fa-question-circle"></i>
+                    <div>
+                        <ul>
+                            <li>Real-world data is noisy and incomplete</li>
+                            <li>ML models must make decisions with <span class="highlight">imperfect information</span></li>
+                            <li>Probability provides mathematical framework for <span class="highlight">quantifying uncertainty</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>Key Applications in ML</h3>
+                <div class="icon-box">
+                    <i class="fas fa-chart-line"></i>
+                    <div>
+                        <ul>
+                            <li><span class="highlight">Classification</span>: Predicting class probabilities</li>
+                            <li><span class="highlight">Regression</span>: Modeling uncertainty in predictions</li>
+                            <li><span class="highlight">Clustering</span>: Probabilistic assignment to groups</li>
+                            <li><span class="highlight">Reinforcement Learning</span>: Decision making under uncertainty</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="concept-box">
+                <h3>Foundation for Algorithms</h3>
+                <div class="icon-box">
+                    <i class="fas fa-cogs"></i>
+                    <div>
+                        <ul>
+                            <li>Naive Bayes, Gaussian Mixture Models</li>
+                            <li>Bayesian Neural Networks, Hidden Markov Models</li>
+                            <li>Probabilistic Graphical Models</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 5: Sample Space & Events -->
+        <div class="slide" id="slide-4">
+            <h2>Sample Space & Events</h2>
+            
+            <div class="concept-box">
+                <h3>Sample Space (Ω)</h3>
+                <p>Set of all possible outcomes (mutually exclusive, collectively exhaustive, right granularity)</p>
+                <div class="formula">
+                    \( \Omega = \{\omega_1, \omega_2, \ldots, \omega_n\} \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-project-diagram"></i>
+                    <div>
+                        <p>In ML, sample space represents all possible model outputs:</p>
+                        <ul>
+                            <li><span class="highlight">Classification</span>: Ω = {cat, dog, bird}</li>
+                            <li><span class="highlight">Regression</span>: Ω = ℝ (real numbers)</li>
+                            <li><span class="highlight">Clustering</span>: Ω = all possible cluster assignments</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="concept-box">
+                <h3>Events</h3>
+                <p>An event is a subset of the sample space</p>
+                <div class="formula">
+                    \( A \subseteq \Omega \)
+                </div>
+                <p>Probability is assigned to events, not individual outcomes</p>
+            </div>
+        </div>
+        
+        <!-- Slide 6: Probability Axioms -->
+        <div class="slide" id="slide-5">
+            <h2>Probability Axioms</h2>
+            
+            <div class="concept-box">
+                <h3>Kolmogorov's Axioms</h3>
+                <ol>
+                    <li><span class="highlight">Nonnegativity</span>: \( P(A) \geq 0 \) for all events A</li>
+                    <li><span class="highlight">Normalization</span>: \( P(\Omega) = 1 \)</li>
+                    <li><span class="highlight">Additivity</span>: For disjoint events \( A_1, A_2, \ldots \): \( P(\bigcup_i A_i) = \sum_i P(A_i) \)</li>
+                </ol>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-balance-scale"></i>
+                    <div>
+                        <p>These axioms ensure consistent probability assignments in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Nonnegativity</span>: All prediction probabilities are ≥ 0</li>
+                            <li><span class="highlight">Normalization</span>: Class probabilities sum to 1 in classifiers</li>
+                            <li><span class="highlight">Additivity</span>: Probability of mutually exclusive outcomes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 7: Corollaries of Axioms -->
+        <div class="slide" id="slide-6">
+            <h2>Corollaries of Axioms</h2>
+            
+            <div class="concept-box">
+                <h3>Key Properties</h3>
+                <ul>
+                    <li>\( P(\emptyset) = 0 \)</li>
+                    <li>\( P(A) + P(A^c) = 1 \)</li>
+                    <li>\( P(A) \leq 1 \)</li>
+                    <li>If \( A \subset B \), then \( P(A) \leq P(B) \)</li>
+                    <li>\( P(A \cup B) = P(A) + P(B) - P(A \cap B) \)</li>
+                    <li>\( P(A \cup B) \leq P(A) + P(B) \)</li>
+                </ul>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Applications</h3>
+                <div class="icon-box">
+                    <i class="fas fa-calculator"></i>
+                    <div>
+                        <ul>
+                            <li><span class="highlight">Impossible event</span>: \( P(\text{model error}) = 0 \)</li>
+                            <li><span class="highlight">Complement</span>: \( P(\text{correct}) = 1 - P(\text{error}) \)</li>
+                            <li><span class="highlight">Bounded probabilities</span>: Confidence scores</li>
+                            <li><span class="highlight">Union bound</span>: Ensemble model combination</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 8: Discrete Uniform Law -->
+        <div class="slide" id="slide-7">
+            <h2>Discrete Uniform Law</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>If Ω has n equally likely outcomes, and A ⊂ Ω has k elements:</p>
+                <div class="formula">
+                    \( P(A) = \frac{k}{n} \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-dice"></i>
+                    <div>
+                        <p>Applications in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Random initialization</span> of neural networks</li>
+                            <li><span class="highlight">Data augmentation</span> with random transformations</li>
+                            <li><span class="highlight">Baseline models</span> (uniform prediction)</li>
+                            <li><span class="highlight">Cross-validation</span> partitioning</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="distribution-visual" id="uniform-chart">
+                <div class="bar" style="height: 80px;"></div>
+                <div class="bar" style="height: 80px;"></div>
+                <div class="bar" style="height: 80px;"></div>
+                <div class="bar" style="height: 80px;"></div>
+                <div class="bar" style="height: 80px;"></div>
+            </div>
+        </div>
+        
+        <!-- Slide 9: Conditional Probability -->
+        <div class="slide" id="slide-8">
+            <h2>Conditional Probability</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>Given event B has occurred with P(B) > 0:</p>
+                <div class="formula">
+                    \( P(A|B) = \frac{P(A \cap B)}{P(B)} \)
+                </div>
+                <p>Properties:</p>
+                <ul>
+                    <li>\( P(A|B) \geq 0 \)</li>
+                    <li>\( P(\Omega|B) = 1 \)</li>
+                    <li>\( P(B|B) = 1 \)</li>
+                    <li>If \( A \cap C = \emptyset \): \( P(A \cup C | B) = P(A|B) + P(C|B) \)</li>
+                </ul>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-filter"></i>
+                    <div>
+                        <p>Fundamental to supervised learning:</p>
+                        <ul>
+                            <li><span class="highlight">Prediction</span>: P(class | features)</li>
+                            <li><span class="highlight">Naive Bayes classifiers</span></li>
+                            <li><span class="highlight">Markov Decision Processes</span> in RL</li>
+                            <li><span class="highlight">Conditional Random Fields</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 10: Multiplication Rule -->
+        <div class="slide" id="slide-9">
+            <h2>Multiplication Rule</h2>
+            
+            <div class="concept-box">
+                <h3>Theorem</h3>
+                <div class="formula">
+                    \( P(A_1 \cap \cdots \cap A_n) = P(A_1) \cdot P(A_2|A_1) \cdots P(A_n|A_1 \cap \cdots \cap A_{n-1}) \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-link"></i>
+                    <div>
+                        <p>Applications in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Chain rule</span> in probabilistic models</li>
+                            <li><span class="highlight">Hidden Markov Models</span> (HMMs)</li>
+                            <li><span class="highlight">Bayesian networks</span></li>
+                            <li><span class="highlight">Sequence modeling</span> in NLP</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example</h3>
+                <p>In a sequence model, the probability of a sequence of words can be computed using the multiplication rule with conditional probabilities.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 11: Total Probability Theorem -->
+        <div class="slide" id="slide-10">
+            <h2>Total Probability Theorem</h2>
+            
+            <div class="concept-box">
+                <h3>Theorem</h3>
+                <p>Given a partition {A₁, A₂, ...} of sample space:</p>
+                <div class="formula">
+                    \( P(B) = \sum_i P(A_i) P(B|A_i) \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-chart-pie"></i>
+                    <div>
+                        <p>Applications in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Marginalizing</span> over latent variables</li>
+                            <li><span class="highlight">Mixture models</span> (e.g., Gaussian Mixtures)</li>
+                            <li><span class="highlight">Handling missing data</span></li>
+                            <li><span class="highlight">Ensemble methods</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example</h3>
+                <p>In a mixture model, the probability of observing data point x is the sum over all mixture components of the probability of the component times the probability of x given that component.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 12: Bayes' Rule -->
+        <div class="slide" id="slide-11">
+            <h2>Bayes' Rule</h2>
+            
+            <div class="concept-box">
+                <h3>Theorem</h3>
+                <p>For a partition {A₁, A₂, ...} of sample space:</p>
+                <div class="formula">
+                    \( P(A_i|B) = \frac{P(A_i) P(B|A_i)}{\sum_j P(A_j) P(B|A_j)} \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-sync-alt"></i>
+                    <div>
+                        <p>Foundation of Bayesian ML:</p>
+                        <ul>
+                            <li><span class="highlight">Naive Bayes classifiers</span></li>
+                            <li><span class="highlight">Bayesian neural networks</span></li>
+                            <li><span class="highlight">Parameter estimation</span></li>
+                            <li><span class="highlight">Hypothesis testing</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example: Spam Detection</h3>
+                <div class="formula">
+                    \( P(\text{spam}|\text{words}) = \frac{P(\text{spam}) P(\text{words}|\text{spam})}{P(\text{words})} \)
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 13: Independence -->
+        <div class="slide" id="slide-12">
+            <h2>Independence</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>Two events are independent if:</p>
+                <div class="formula">
+                    \( P(A \cap B) = P(A)P(B) \)
+                </div>
+                <p>Equivalently (if P(A)>0, P(B)>0):</p>
+                <div class="formula">
+                    \( P(B|A) = P(B) \quad \text{or} \quad P(A|B) = P(A) \)
+                </div>
+                <p>Properties:</p>
+                <ul>
+                    <li>Symmetric: If A ⊥ B, then B ⊥ A</li>
+                    <li>Holds even if P(A)=0 or P(B)=0</li>
+                </ul>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-unlink"></i>
+                    <div>
+                        <p>Independence assumptions simplify ML models:</p>
+                        <ul>
+                            <li><span class="highlight">Naive Bayes</span>: features independent given class</li>
+                            <li><span class="highlight">Independent component analysis</span> (ICA)</li>
+                            <li><span class="highlight">Bagging</span> in ensemble methods</li>
+                            <li><span class="highlight">Independent noise</span> in regression</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 14: Conditional Independence -->
+        <div class="slide" id="slide-13">
+            <h2>Conditional Independence</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>A and B are independent conditioned on C (P(C)>0) if:</p>
+                <div class="formula">
+                    \( P(A \cap B|C) = P(A|C)P(B|C) \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-project-diagram"></i>
+                    <div>
+                        <p>Key assumption in many ML models:</p>
+                        <ul>
+                            <li><span class="highlight">Naive Bayes</span>: features independent given class</li>
+                            <li><span class="highlight">Markov Random Fields</span></li>
+                            <li><span class="highlight">Hidden Markov Models</span></li>
+                            <li><span class="highlight">Bayesian networks</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example</h3>
+                <p>In Naive Bayes, given the class (spam or not spam), the features (words) are assumed to be conditionally independent.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 15: Counting Principles -->
+        <div class="slide" id="slide-14">
+            <h2>Counting Principles</h2>
+            
+            <div class="concept-box">
+                <h3>Basic Counting Principle</h3>
+                <p>For a selection done in r stages with nᵢ choices at stage i:</p>
+                <div class="formula">
+                    \( \text{Total choices} = n_1 \times n_2 \times \cdots \times n_r \)
+                </div>
+            </div>
+            
+            <div class="concept-box">
+                <h3>Permutations</h3>
+                <p>The number of permutations (orderings) of n different elements:</p>
+                <div class="formula">
+                    \( n! = 1 \times 2 \times 3 \times \cdots \times n \)
+                </div>
+            </div>
+            
+            <div class="concept-box">
+                <h3>Combinations</h3>
+                <p>Given a set of n elements, the number of subsets with exactly k elements:</p>
+                <div class="formula">
+                    \( \binom{n}{k} = \frac{n!}{k!(n-k)!} \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-calculator"></i>
+                    <div>
+                        <ul>
+                            <li><span class="highlight">Hyperparameter grid search</span></li>
+                            <li><span class="highlight">Feature selection</span> (choose k features from n)</li>
+                            <li><span class="highlight">Ensemble methods</span> (e.g., Random Forest subsets)</li>
+                            <li><span class="highlight">Combinatorial optimization</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 16: Permutations -->
+        <div class="slide" id="slide-15">
+            <h2>Permutations</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>A permutation is an arrangement of objects in a specific order. For n distinct objects:</p>
+                <div class="formula">
+                    \( P(n, k) = \frac{n!}{(n-k)!} \)
+                </div>
+                <p>When k = n: \( P(n, n) = n! \)</p>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-sort"></i>
+                    <div>
+                        <p>Applications in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Sequence modeling</span> (e.g., DNA sequences)</li>
+                            <li><span class="highlight">Order-dependent feature engineering</span></li>
+                            <li><span class="highlight">Permutation importance</span> in feature selection</li>
+                            <li><span class="highlight">Time series analysis</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example</h3>
+                <p>In natural language processing, the number of possible orderings of words in a sentence can be calculated using permutations.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 17: Combinations -->
+        <div class="slide" id="slide-16">
+            <h2>Combinations</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>A combination is a selection of objects without regard to order. From n objects choose k:</p>
+                <div class="formula">
+                    \( C(n, k) = \binom{n}{k} = \frac{n!}{k!(n-k)!} \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-object-group"></i>
+                    <div>
+                        <p>Applications in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Feature selection</span> (choose k features from n)</li>
+                            <li><span class="highlight">Ensemble methods</span> (e.g., Random Forest subsets)</li>
+                            <li><span class="highlight">Subset evaluation</span></li>
+                            <li><span class="highlight">Combinatorial optimization</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example</h3>
+                <p>In feature selection, we might want to choose the best subset of k features from n available features to build a model.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 18: Partitions -->
+        <div class="slide" id="slide-17">
+            <h2>Partitions</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>Given an n-element set and nonnegative integers n₁, n₂, ..., nᵣ with sum n, the number of partitions into r disjoint subsets:</p>
+                <div class="formula">
+                    \( \binom{n}{n_1, n_2, \ldots, n_r} = \frac{n!}{n_1! n_2! \cdots n_r!} \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-th-large"></i>
+                    <div>
+                        <p>Applications in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Clustering</span> (assigning data points to clusters)</li>
+                            <li><span class="highlight">Stratified sampling</span></li>
+                            <li><span class="highlight">Multi-class classification</span></li>
+                            <li><span class="highlight">Cluster analysis</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example</h3>
+                <p>In k-means clustering, we partition the dataset into k clusters, and the number of ways to assign n points to k clusters of sizes n₁, n₂, ..., nₖ is given by the multinomial coefficient.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 19: Random Variables -->
+        <div class="slide" id="slide-18">
+            <h2>Random Variables</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>A random variable X is a function from sample space to real numbers:</p>
+                <div class="formula">
+                    \( X: \Omega \to \mathbb{R} \)
+                </div>
+                <p>Can be discrete or continuous</p>
+            </div>
+            
+            <div class="concept-box">
+                <h3>Probability Mass Function (PMF)</h3>
+                <p>For discrete random variable X:</p>
+                <div class="formula">
+                    \( p_X(x) = P(X = x) \)
+                </div>
+                <p>Properties:</p>
+                <ul>
+                    <li>\( p_X(x) \geq 0 \) for all x</li>
+                    <li>\( \sum_x p_X(x) = 1 \)</li>
+                </ul>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-random"></i>
+                    <div>
+                        <p>Random variables model ML quantities:</p>
+                        <ul>
+                            <li><span class="highlight">Discrete</span>: Class labels, word counts</li>
+                            <li><span class="highlight">Continuous</span>: Features, predictions, errors</li>
+                            <li><span class="highlight">Model parameters</span> as random variables in Bayesian ML</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 20: Probability Mass Function -->
+        <div class="slide" id="slide-19">
+            <h2>Probability Mass Function</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>The probability mass function (PMF) of a discrete random variable X is:</p>
+                <div class="formula">
+                    \( p_X(x) = P(X = x) = P(\{\omega \in \Omega : X(\omega) = x\}) \)
+                </div>
+                <p>Properties:</p>
+                <ul>
+                    <li>\( p_X(x) \geq 0 \) for all x</li>
+                    <li>\( \sum_x p_X(x) = 1 \)</li>
+                </ul>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-chart-bar"></i>
+                    <div>
+                        <p>PMFs model discrete distributions in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Class distributions</span> in classification</li>
+                            <li><span class="highlight">Word frequencies</span> in NLP</li>
+                            <li><span class="highlight">Discrete output predictions</span></li>
+                            <li><span class="highlight">Count data modeling</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example</h3>
+                <p>In text classification, the PMF represents the probability distribution over different classes given the input features.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 21: Bernoulli Random Variable -->
+        <div class="slide" id="slide-20">
+            <h2>Bernoulli Random Variable</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>X ~ Ber(p) takes values:</p>
+                <div class="formula">
+                    \( X = \begin{cases} 
+                        1 & \text{with probability } p \\
+                        0 & \text{with probability } 1-p 
+                    \end{cases} \)
+                </div>
+                <p>Expectation: E[X] = p</p>
+                <p>Variance: Var(X) = p(1-p)</p>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-toggle-on"></i>
+                    <div>
+                        <p>Fundamental in binary ML tasks:</p>
+                        <ul>
+                            <li><span class="highlight">Binary classification</span> (spam/not spam)</li>
+                            <li><span class="highlight">Indicator variables</span> (e.g., I_A = 1 if event A occurs)</li>
+                            <li><span class="highlight">Binary features</span> in datasets</li>
+                            <li><span class="highlight">Success/failure</span> in reinforcement learning</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example</h3>
+                <p>In spam detection, each email can be represented as a Bernoulli random variable where X=1 indicates spam and X=0 indicates not spam.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 22: Discrete Uniform Random Variable -->
+        <div class="slide" id="slide-21">
+            <h2>Discrete Uniform Random Variable</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>X ~ Uni[a,b] takes any value in {a, a+1, ..., b} with equal probability:</p>
+                <div class="formula">
+                    \( P(X = k) = \frac{1}{b-a+1} \quad \text{for } k = a, a+1, \ldots, b \)
+                </div>
+                <p>Expectation: E[X] = (a+b)/2</p>
+                <p>Variance: Var(X) = (b-a)(b-a+2)/12</p>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-dice-d20"></i>
+                    <div>
+                        <p>Applications in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Random baseline models</span></li>
+                            <li><span class="highlight">Uniform initialization</span> in neural networks</li>
+                            <li><span class="highlight">Discrete uniform priors</span> in Bayesian inference</li>
+                            <li><span class="highlight">Random sampling</span> in algorithms</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="distribution-visual" id="uniform-chart">
+                <div class="bar" style="height: 80px;"></div>
+                <div class="bar" style="height: 80px;"></div>
+                <div class="bar" style="height: 80px;"></div>
+                <div class="bar" style="height: 80px;"></div>
+                <div class="bar" style="height: 80px;"></div>
+            </div>
+        </div>
+        
+        <!-- Slide 23: Binomial Random Variable -->
+        <div class="slide" id="slide-22">
+            <h2>Binomial Random Variable</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>X ~ Bin(n,p) represents number of successes in n independent trials:</p>
+                <div class="formula">
+                    \( p_X(i) = \binom{n}{i} p^i (1-p)^{n-i} \quad \text{for } i = 0, 1, \ldots, n \)
+                </div>
+                <p>Expectation: E[X] = np</p>
+                <p>Variance: Var(X) = np(1-p)</p>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-chart-line"></i>
+                    <div>
+                        <p>Applications in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Counting correct predictions</span> in n trials</li>
+                            <li><span class="highlight">Number of positive samples</span> in batch</li>
+                            <li><span class="highlight">Feature counts</span> (e.g., word occurrences)</li>
+                            <li><span class="highlight">Binomial likelihood</span> in parameter estimation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example</h3>
+                <p>In a classification task with 100 test samples, the number of correct predictions follows a binomial distribution if each prediction is independent.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 24: Geometric Random Variable -->
+        <div class="slide" id="slide-23">
+            <h2>Geometric Random Variable</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>X ~ Geo(p) represents number of trials until first success:</p>
+                <div class="formula">
+                    \( p_X(i) = (1-p)^{i-1}p \quad \text{for } i = 1, 2, \ldots \)
+                </div>
+                <p>Expectation: E[X] = 1/p</p>
+                <p>Variance: Var(X) = (1-p)/p²</p>
+            </div>
+            
+            <div class="concept-box">
+                <h3>Memorylessness Property</h3>
+                <div class="formula">
+                    \( P(X - n > k | X > n) = P(X > k) \)
+                </div>
+                <p>The "remaining time" after n trials has the same distribution as the original time</p>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-hourglass-half"></i>
+                    <div>
+                        <p>Applications in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Time until first success</span> in RL</li>
+                            <li><span class="highlight">Waiting time between events</span></li>
+                            <li><span class="highlight">Number of trials until convergence</span></li>
+                            <li><span class="highlight">Memoryless property</span> in sequential processes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 25: Expectation -->
+        <div class="slide" id="slide-24">
+            <h2>Expectation</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>For discrete random variable X:</p>
+                <div class="formula">
+                    \( E[X] = \sum_x x \cdot p_X(x) \)
+                </div>
+                <p>For continuous random variable X:</p>
+                <div class="formula">
+                    \( E[X] = \int_{-\infty}^{\infty} x \cdot f_X(x) dx \)
+                </div>
+                <p>Properties:</p>
+                <ul>
+                    <li>If X ≥ 0, then E[X] ≥ 0</li>
+                    <li>If a ≤ X ≤ b, then a ≤ E[X] ≤ b</li>
+                    <li>If X = c (constant), then E[X] = c</li>
+                </ul>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-calculator"></i>
+                    <div>
+                        <p>Expectation is central to ML:</p>
+                        <ul>
+                            <li><span class="highlight">Expected prediction error</span></li>
+                            <li><span class="highlight">Loss function minimization</span></li>
+                            <li><span class="highlight">Model evaluation metrics</span></li>
+                            <li><span class="highlight">Expected value of parameters</span> in Bayesian ML</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Examples</h3>
+                <div class="grid-container">
+                    <div class="grid-item">
+                        <p><strong>Bernoulli</strong>: E[X] = p</p>
+                        <p><strong>Binomial</strong>: E[X] = np</p>
+                    </div>
+                    <div class="grid-item">
+                        <p><strong>Geometric</strong>: E[X] = 1/p</p>
+                        <p><strong>Uniform</strong>: E[X] = (a+b)/2</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 26: Variance -->
+        <div class="slide" id="slide-25">
+            <h2>Variance</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>Measure of spread of random variable:</p>
+                <div class="formula">
+                    \( \text{Var}(X) = E[(X - E[X])^2] = E[X^2] - (E[X])^2 \)
+                </div>
+                <p>Standard deviation: σ = √Var(X)</p>
+                <p>Properties:</p>
+                <ul>
+                    <li>Var(aX) = a² Var(X)</li>
+                    <li>Var(X + b) = Var(X)</li>
+                    <li>Var(aX + b) = a² Var(X)</li>
+                </ul>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                    <div>
+                        <p>Variance quantifies uncertainty in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Model stability</span> (high variance → overfitting)</li>
+                            <li><span class="highlight">Ensemble methods</span> to reduce variance</li>
+                            <li><span class="highlight">Uncertainty quantification</span> in predictions</li>
+                            <li><span class="highlight">Analysis of gradient variance</span> in optimization</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Examples</h3>
+                <div class="grid-container">
+                    <div class="grid-item">
+                        <p><strong>Bernoulli</strong>: Var(X) = p(1-p)</p>
+                        <p><strong>Binomial</strong>: Var(X) = np(1-p)</p>
+                    </div>
+                    <div class="grid-item">
+                        <p><strong>Geometric</strong>: Var(X) = (1-p)/p²</p>
+                        <p><strong>Uniform</strong>: Var(X) = (b-a)(b-a+2)/12</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 27: Expected Value Rule -->
+        <div class="slide" id="slide-26">
+            <h2>Expected Value Rule</h2>
+            
+            <div class="concept-box">
+                <h3>Theorem</h3>
+                <p>For Y = g(X):</p>
+                <div class="formula">
+                    \( E[Y] = E[g(X)] = \sum_x g(x) p_X(x) \)
+                </div>
+                <p>PMF of Y: p_Y(y) = ∑_{x: g(x)=y} p_X(x)</p>
+                <p>Caution: g(E[X]) ≠ E[g(X)] unless g is linear</p>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-function"></i>
+                    <div>
+                        <p>Applications in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Loss functions</span> (e.g., squared error)</li>
+                            <li><span class="highlight">Non-linear transformations</span> of predictions</li>
+                            <li><span class="highlight">Activation functions</span> in neural networks</li>
+                            <li><span class="highlight">Regularization terms</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example</h3>
+                <p>In regression, the expected squared error is E[(Y - Ŷ)²], which can be computed using the expected value rule.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 28: Conditioning on Event -->
+        <div class="slide" id="slide-27">
+            <h2>Conditioning on an Event</h2>
+            
+            <div class="concept-box">
+                <h3>Conditional PMF</h3>
+                <p>Given event A with P(A) > 0:</p>
+                <div class="formula">
+                    \( p_{X|A}(x) = P(X = x | A) \)
+                </div>
+                <p>If A ⊂ range(X):</p>
+                <div class="formula">
+                    \( p_{X|A}(x) = \begin{cases} 
+                        \frac{p_X(x)}{P(A)} & \text{if } x \in A \\
+                        0 & \text{otherwise}
+                    \end{cases} \)
+                </div>
+                <p>Properties: ∑_x p_{X|A}(x) = 1</p>
+            </div>
+            
+            <div class="concept-box">
+                <h3>Conditional Expectation</h3>
+                <div class="formula">
+                    \( E[X | A] = \sum_x x p_{X|A}(x) \)
+                </div>
+                <div class="formula">
+                    \( E[g(X) | A] = \sum_x g(x) p_{X|A}(x) \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-filter"></i>
+                    <div>
+                        <p>Expected value under specific conditions:</p>
+                        <ul>
+                            <li><span class="highlight">Expected prediction given class</span></li>
+                            <li><span class="highlight">Conditional risk minimization</span></li>
+                            <li><span class="highlight">Stratified analysis</span> of model performance</li>
+                            <li><span class="highlight">Context-aware predictions</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 29: Total Expectation -->
+        <div class="slide" id="slide-28">
+            <h2>Total Expectation</h2>
+            
+            <div class="concept-box">
+                <h3>Theorem</h3>
+                <p>Given partition {A₁, A₂, ..., Aₙ} of sample space:</p>
+                <div class="formula">
+                    \( E[X] = \sum_{i=1}^n P(A_i) E[X | A_i] \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-balance-scale-right"></i>
+                    <div>
+                        <p>Applications in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Hierarchical modeling</span></li>
+                            <li><span class="highlight">Missing data handling</span></li>
+                            <li><span class="highlight">Reinforcement learning</span> (value iteration)</li>
+                            <li><span class="highlight">Variance reduction techniques</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example</h3>
+                <p>In a mixture model, the overall expectation can be computed as the weighted average of the conditional expectations given each mixture component.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 30: Memorylessness of Geometric -->
+        <div class="slide" id="slide-29">
+            <h2>Memorylessness of Geometric Random Variable</h2>
+            
+            <div class="concept-box">
+                <h3>Theorem</h3>
+                <p>For X ~ Geo(p):</p>
+                <div class="formula">
+                    \( P(X - n > k | X > n) = P(X > k) \)
+                </div>
+                <p>The "remaining time" after n trials has the same distribution as the original time</p>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-redo"></i>
+                    <div>
+                        <p>Applications in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Reinforcement learning</span> (time until next success is memoryless)</li>
+                            <li><span class="highlight">Survival analysis</span></li>
+                            <li><span class="highlight">Sequential decision making</span></li>
+                            <li><span class="highlight">Queueing systems</span> in service modeling</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example</h3>
+                <p>In reinforcement learning, if an agent has been trying to achieve a goal for n steps, the expected additional time needed is the same as if it were starting fresh.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 31: Multiple Discrete RVs -->
+        <div class="slide" id="slide-30">
+            <h2>Multiple Discrete Random Variables</h2>
+            
+            <div class="concept-box">
+                <h3>Joint PMF</h3>
+                <p>For random variables X₁, X₂, ..., Xₙ:</p>
+                <div class="formula">
+                    \( p_{X_1,X_2,\ldots,X_n}(x_1, x_2, \ldots, x_n) = P(X_1=x_1, X_2=x_2, \ldots, X_n=x_n) \)
+                </div>
+                <p>Properties:</p>
+                <ul>
+                    <li>∑_{x₁}⋯∑_{xₙ} p_{X₁,…,Xₙ}(x₁,…,xₙ) = 1</li>
+                    <li>Marginal PMF: p_{X₁}(x₁) = ∑_{x₂}⋯∑_{xₙ} p_{X₁,…,Xₙ}(x₁,x₂,…,xₙ)</li>
+                </ul>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-object-group"></i>
+                    <div>
+                        <p>Joint distributions model relationships in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Feature-feature interactions</span></li>
+                            <li><span class="highlight">Multi-output predictions</span></li>
+                            <li><span class="highlight">Latent variable models</span> (e.g., VAEs)</li>
+                            <li><span class="highlight">Copulas for dependency modeling</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 32: Functions of Multiple RVs -->
+        <div class="slide" id="slide-31">
+            <h2>Functions of Multiple Random Variables</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>For Z = g(X₁, ..., Xₙ):</p>
+                <div class="formula">
+                    \( p_Z(z) = P(g(X_1, \ldots, X_n) = z) \)
+                </div>
+                <p>Expected Value Rule:</p>
+                <div class="formula">
+                    \( E[g(X_1, \ldots, X_n)] = \sum_{x_1,\ldots,x_n} g(x_1,\ldots,x_n) p_{X_1,\ldots,X_n}(x_1,\ldots,x_n) \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-code-branch"></i>
+                    <div>
+                        <p>Applications in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Composite loss functions</span></li>
+                            <li><span class="highlight">Multi-output predictions</span></li>
+                            <li><span class="highlight">Ensemble methods</span></li>
+                            <li><span class="highlight">Feature engineering</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example</h3>
+                <p>In ensemble learning, the combined prediction might be a function of multiple individual model predictions, such as averaging or weighted voting.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 33: Linearity of Expectation -->
+        <div class="slide" id="slide-32">
+            <h2>Linearity of Expectation</h2>
+            
+            <div class="concept-box">
+                <h3>Theorem</h3>
+                <div class="formula">
+                    \( E[aX + b] = aE[X] + b \)
+                </div>
+                <div class="formula">
+                    \( E[X_1 + \cdots + X_n] = E[X_1] + \cdots + E[X_n] \)
+                </div>
+                <p>Important: Holds even if variables are dependent!</p>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-plus"></i>
+                    <div>
+                        <p>Linearity simplifies many ML calculations:</p>
+                        <ul>
+                            <li><span class="highlight">Expected value of sum of errors</span></li>
+                            <li><span class="highlight">Model averaging</span> in ensembles</li>
+                            <li><span class="highlight">Gradient calculations</span> in optimization</li>
+                            <li><span class="highlight">Bias-variance decomposition</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example</h3>
+                <p>The expected value of the sum of prediction errors from multiple models is the sum of their individual expected errors, regardless of correlation between models.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 34: Conditioning on Random Variable -->
+        <div class="slide" id="slide-33">
+            <h2>Conditioning on a Random Variable</h2>
+            
+            <div class="concept-box">
+                <h3>Conditional PMF</h3>
+                <p>Given discrete random variables X,Y and y with p_Y(y) > 0:</p>
+                <div class="formula">
+                    \( p_{X|Y}(x|y) = \frac{p_{X,Y}(x,y)}{p_Y(y)} \)
+                </div>
+                <p>Multiplication Rule:</p>
+                <div class="formula">
+                    \( p_{X,Y}(x,y) = p_X(x) p_{Y|X}(y|x) = p_Y(y) p_{X|Y}(x|y) \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-filter"></i>
+                    <div>
+                        <p>Fundamental to many ML algorithms:</p>
+                        <ul>
+                            <li><span class="highlight">Likelihood in discriminative models</span></li>
+                            <li><span class="highlight">Emission probabilities</span> in HMMs</li>
+                            <li><span class="highlight">Conditional distributions</span> in generative models</li>
+                            <li><span class="highlight">Posterior inference</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 35: Conditional Expectation -->
+        <div class="slide" id="slide-34">
+            <h2>Conditional Expectation</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>Given discrete random variables X,Y and y with p_Y(y) > 0:</p>
+                <div class="formula">
+                    \( E[X | Y = y] = \sum_x x p_{X|Y}(x|y) \)
+                </div>
+                <p>For function g:</p>
+                <div class="formula">
+                    \( E[g(X) | Y = y] = \sum_x g(x) p_{X|Y}(x|y) \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-chart-line"></i>
+                    <div>
+                        <p>Conditional expectation is key in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Regression</span>: E[Y | X] as prediction function</li>
+                            <li><span class="highlight">Value functions</span> in reinforcement learning</li>
+                            <li><span class="highlight">Optimal prediction</span> under squared loss</li>
+                            <li><span class="highlight">Conditional risk minimization</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 36: Total Probability for RVs -->
+        <div class="slide" id="slide-35">
+            <h2>Total Probability for Random Variables</h2>
+            
+            <div class="concept-box">
+                <h3>Theorems</h3>
+                <p>Total Probability:</p>
+                <div class="formula">
+                    \( p_X(x) = \sum_y p_Y(y) p_{X|Y}(x|y) \)
+                </div>
+                <p>Total Expectation:</p>
+                <div class="formula">
+                    \( E[X] = \sum_y p_Y(y) E[X | Y = y] \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-chart-pie"></i>
+                    <div>
+                        <p>Applications in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Marginalizing over hidden variables</span></li>
+                            <li><span class="highlight">Variational inference</span></li>
+                            <li><span class="highlight">Expectation propagation</span></li>
+                            <li><span class="highlight">Hierarchical Bayesian models</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Example</h3>
+                <p>In a latent variable model, the marginal distribution of observed variables is obtained by summing over all possible values of the latent variables.</p>
+            </div>
+        </div>
+        
+        <!-- Slide 37: Independence of RVs -->
+        <div class="slide" id="slide-36">
+            <h2>Independence of Random Variables</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>Discrete random variables X and Y are independent if:</p>
+                <div class="formula">
+                    \( p_{X,Y}(x,y) = p_X(x) p_Y(y) \quad \forall x,y \)
+                </div>
+                <p>Equivalent: \( p_{X|Y}(x|y) = p_X(x) \)</p>
+                <p>Properties:</p>
+                <ul>
+                    <li>E[XY] = E[X]E[Y]</li>
+                    <li>Var(X + Y) = Var(X) + Var(Y)</li>
+                    <li>E[g(X)h(Y)] = E[g(X)]E[h(Y)]</li>
+                </ul>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-unlink"></i>
+                    <div>
+                        <p>Independence simplifies ML models:</p>
+                        <ul>
+                            <li><span class="highlight">Independent features</span> in Naive Bayes</li>
+                            <li><span class="highlight">Independent noise</span> in regression</li>
+                            <li><span class="highlight">Factor analysis</span></li>
+                            <li><span class="highlight">Product of experts</span> models</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 38: Continuous Random Variables -->
+        <div class="slide" id="slide-37">
+            <h2>Continuous Random Variables</h2>
+            
+            <div class="concept-box">
+                <h3>Probability Density Function (PDF)</h3>
+                <p>For continuous random variable X:</p>
+                <div class="formula">
+                    \( f_X(x) \geq 0, \quad \int_{-\infty}^{\infty} f_X(x) dx = 1
+                </div>
+                <p>Properties:</p>
+                <ul>
+                    <li>P(a ≤ X ≤ b) = ∫<sub>a</sub><sup>b</sup> f<sub>X</sub>(x) dx</li>
+                    <li>P(X = a) = 0 for all a (no point mass)</li>
+                    <li>For small δ > 0: P(a ≤ X ≤ a + δ) ≈ f_X(a)δ</li>
+                </ul>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-wave-square"></i>
+                    <div>
+                        <p>PDFs model continuous quantities in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Feature distributions</span></li>
+                            <li><span class="highlight">Regression outputs</span></li>
+                            <li><span class="highlight">Parameter distributions</span> in Bayesian ML</li>
+                            <li><span class="highlight">Latent variable models</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 39: Normal Random Variable -->
+        <div class="slide" id="slide-38">
+            <h2>Normal (Gaussian) Random Variable</h2>
+            
+            <div class="concept-box">
+                <h3>Definition</h3>
+                <p>X ~ N(μ, σ²) has PDF:</p>
+                <div class="formula">
+                    \( f_X(x) = \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(x-\mu)^2}{2\sigma^2}} \)
+                </div>
+                <p>Expectation: E[X] = μ</p>
+                <p>Variance: Var(X) = σ²</p>
+            </div>
+            
+            <div class="concept-box">
+                <h3>Standard Normal</h3>
+                <p>Z ~ N(0,1) is the standard normal distribution</p>
+                <p>Linear transformation: If X ~ N(μ, σ²), then aX + b ~ N(aμ + b, a²σ²)</p>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-bell-curve"></i>
+                    <div>
+                        <p>Gaussian distributions are ubiquitous in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Noise modeling</span> in regression</li>
+                            <li><span class="highlight">Gaussian Mixture Models</span> for clustering</li>
+                            <li><span class="highlight">Gaussian Processes</span> for regression</li>
+                            <li><span class="highlight">Weight initialization</span> in neural networks</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="distribution-visual" id="normal-chart">
+                <div class="bar" style="height: 20px;"></div>
+                <div class="bar" style="height: 40px;"></div>
+                <div class="bar" style="height: 70px;"></div>
+                <div class="bar" style="height: 100px;"></div>
+                <div class="bar" style="height: 120px;"></div>
+                <div class="bar" style="height: 100px;"></div>
+                <div class="bar" style="height: 70px;"></div>
+                <div class="bar" style="height: 40px;"></div>
+                <div class="bar" style="height: 20px;"></div>
+            </div>
+        </div>
+        
+        <!-- Slide 40: Covariance & Correlation -->
+        <div class="slide" id="slide-39">
+            <h2>Covariance & Correlation</h2>
+            
+            <div class="grid-container">
+                <div class="grid-item">
+                    <h3>Covariance</h3>
+                    <div class="formula">
+                        \( \text{Cov}(X,Y) = E[(X - E[X])(Y - E[Y])] = E[XY] - E[X]E[Y] \)
+                    </div>
+                    <p>Properties:</p>
+                    <ul>
+                        <li>Cov(X,X) = Var(X)</li>
+                        <li>Cov(aX + b, Y) = a Cov(X,Y)</li>
+                        <li>Cov(X,Y + Z) = Cov(X,Y) + Cov(X,Z)</li>
+                        <li>If X,Y independent, Cov(X,Y) = 0 (not vice versa)</li>
+                    </ul>
+                </div>
+                
+                <div class="grid-item">
+                    <h3>Correlation</h3>
+                    <div class="formula">
+                        \( \rho(X,Y) = \frac{\text{Cov}(X,Y)}{\sigma_X \sigma_Y} \in [-1, 1] \)
+                    </div>
+                    <p>Properties:</p>
+                    <ul>
+                        <li>ρ = 1: Perfect positive linear relationship</li>
+                        <li>ρ = -1: Perfect negative linear relationship</li>
+                        <li>ρ = 0: No linear correlation (not necessarily independent)</li>
+                        <li>|ρ| = 1 iff X - E[X] = c(Y - E[Y])</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-link"></i>
+                    <div>
+                        <p>Key for feature analysis in ML:</p>
+                        <ul>
+                            <li><span class="highlight">Principal Component Analysis</span> (PCA)</li>
+                            <li><span class="highlight">Feature selection</span> (remove correlated features)</li>
+                            <li><span class="highlight">Multicollinearity detection</span> in regression</li>
+                            <li><span class="highlight">Canonical Correlation Analysis</span> (CCA)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 41: Convergence Theorems -->
+        <div class="slide" id="slide-40">
+            <h2>Convergence Theorems</h2>
+            
+            <div class="three-grid">
+                <div class="grid-item">
+                    <h3>Markov Inequality</h3>
+                    <p>For non-negative random variable X and a > 0:</p>
+                    <div class="formula">
+                        \( P(X \geq a) \leq \frac{E[X]}{a} \)
+                    </div>
+                </div>
+                
+                <div class="grid-item">
+                    <h3>Chebyshev Inequality</h3>
+                    <p>For random variable X with mean μ and variance σ²:</p>
+                    <div class="formula">
+                        \( P(|X - \mu| \geq \epsilon) \leq \frac{\sigma^2}{\epsilon^2} \)
+                    </div>
+                </div>
+                
+                <div class="grid-item">
+                    <h3>Weak Law of Large Numbers</h3>
+                    <p>For i.i.d. X₁, X₂, ... with E[Xᵢ] = μ, Var(Xᵢ) = σ²:</p>
+                    <div class="formula">
+                        \( \lim_{n \to \infty} P\left( \left| \frac{1}{n} \sum_{i=1}^n X_i - \mu \right| \geq \epsilon \right) = 0 \)
+                    </div>
+                </div>
+            </div>
+            
+            <div class="concept-box">
+                <h3>Central Limit Theorem (CLT)</h3>
+                <p>For i.i.d. X₁, X₂, ... with E[Xᵢ] = μ, Var(Xᵢ) = σ²:</p>
+                <div class="formula">
+                    \( Z_n = \frac{\sum_{i=1}^n (X_i - \mu)}{\sigma \sqrt{n}} \xrightarrow{d} \mathcal{N}(0,1) \)
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>ML Connection</h3>
+                <div class="icon-box">
+                    <i class="fas fa-chart-area"></i>
+                    <div>
+                        <p>Convergence theorems provide theoretical guarantees:</p>
+                        <ul>
+                            <li><span class="highlight">Generalization bounds</span> (Markov, Chebyshev)</li>
+                            <li><span class="highlight">Consistency of estimators</span> (WLLN)</li>
+                            <li><span class="highlight">Normal approximation</span> in large samples (CLT)</li>
+                            <li><span class="highlight">Confidence intervals</span> for model performance</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 42: ML Algorithms -->
+        <div class="slide" id="slide-41">
+            <h2>ML Algorithms & Probability</h2>
+            
+            <div class="ml-algorithm">
+                <i class="fas fa-envelope"></i>
+                <div>
+                    <h4>Naive Bayes</h4>
+                    <p>Uses Bayes' rule with independence assumption for classification</p>
+                </div>
+            </div>
+            
+            <div class="ml-algorithm">
+                <i class="fas fa-project-diagram"></i>
+                <div>
+                    <h4>Hidden Markov Models</h4>
+                    <p>Models sequential data using conditional probabilities</p>
+                </div>
+            </div>
+            
+            <div class="ml-algorithm">
+                <i class="fas fa-brain"></i>
+                <div>
+                    <h4>Bayesian Neural Networks</h4>
+                    <p>Treats weights as random variables with prior distributions</p>
+                </div>
+            </div>
+            
+            <div class="ml-algorithm">
+                <i class="fas fa-chart-pie"></i>
+                <div>
+                    <h4>Gaussian Mixture Models</h4>
+                    <p>Uses multivariate Gaussians for clustering and density estimation</p>
+                </div>
+            </div>
+            
+            <div class="ml-algorithm">
+                <i class="fas fa-sync-alt"></i>
+                <div>
+                    <h4>Expectation-Maximization</h4>
+                    <p>Iterative algorithm using conditional expectation for parameter estimation</p>
+                </div>
+            </div>
+            
+            <div class="ml-algorithm">
+                <i class="fas fa-bell-curve"></i>
+                <div>
+                    <h4>Gaussian Processes</h4>
+                    <p>Non-parametric Bayesian approach to regression using Gaussian distributions</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 43: Summary -->
+        <div class="slide" id="slide-42">
+            <h2>Summary: Probability in ML</h2>
+            
+            <div class="grid-container">
+                <div class="grid-item">
+                    <h3>Probability Concepts</h3>
+                    <ul>
+                        <li>Sample space & events</li>
+                        <li>Random variables</li>
+                        <li>Expectation & variance</li>
+                        <li>Conditioning & Bayes' rule</li>
+                        <li>Independence</li>
+                        <li>Convergence theorems</li>
+                    </ul>
+                </div>
+                
+                <div class="grid-item">
+                    <h3>ML Applications</h3>
+                    <ul>
+                        <li>Classification & regression</li>
+                        <li>Model evaluation</li>
+                        <li>Uncertainty quantification</li>
+                        <li>Bayesian inference</li>
+                        <li>Feature engineering</li>
+                        <li>Algorithm guarantees</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="ml-box">
+                <h3>Key Takeaway</h3>
+                <p>Probability theory provides the mathematical foundation for understanding and developing machine learning algorithms that can reason under uncertainty.</p>
+            </div>
+            
+            <div class="concept-box">
+                <h3>Essential for Modern ML</h3>
+                <ul>
+                    <li><span class="highlight">Bayesian methods</span> for uncertainty quantification</li>
+                    <li><span class="highlight">Probabilistic models</span> for complex data</li>
+                    <li><span class="highlight">Statistical guarantees</span> for algorithm performance</li>
+                    <li><span class="highlight">Theoretical understanding</span> of learning processes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="navigation">
+        <button class="nav-button" onclick="previousSlide()"><i class="fas fa-arrow-left"></i> Previous</button>
+        <button class="nav-button" onclick="nextSlide()">Next <i class="fas fa-arrow-right"></i></button>
+    </div>
+    
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+            document.getElementById('slide-counter').textContent = `${index + 1} / ${totalSlides}`;
+        }
+        
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+        
+        function previousSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+        
+        function goToSlide(index) {
+            if (index >= 0 && index < totalSlides) {
+                currentSlide = index;
+                showSlide(currentSlide);
+                document.getElementById('toc').classList.remove('active');
+            }
+        }
+        
+        function toggleTOC() {
+            const toc = document.getElementById('toc');
+            toc.classList.toggle('active');
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                previousSlide();
+            } else if (e.key === 'Escape') {
+                document.getElementById('toc').classList.remove('active');
+            }
+        });
+        
+        // Interactive distribution charts
+        document.getElementById('uniform-chart')?.addEventListener('click', function() {
+            const bars = this.querySelectorAll('.bar');
+            bars.forEach(bar => {
+                const height = 50 + Math.random() * 50;
+                bar.style.height = `${height}px`;
+            });
+        });
+        
+        document.getElementById('normal-chart')?.addEventListener('click', function() {
+            const bars = this.querySelectorAll('.bar');
+            const heights = [20, 40, 70, 100, 120, 100, 70, 40, 20];
+            bars.forEach((bar, index) => {
+                const variation = (Math.random() - 0.5) * 40;
+                const height = Math.max(10, heights[index] + variation);
+                bar.style.height = `${height}px`;
+            });
+        });
+        
+        // MathJax configuration
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+</body>
+</html>
