@@ -73,7 +73,7 @@ This course covers:
 
 ## Course Learning Outcomes (CLOs)
 
-| Sr. No. | Course Learning Outcomes (CLOs) | SA PLOs | Bloom’s Taxonomy Level |
+| Sr. No. | Course Learning Outcomes (CLOs) | GA's | Bloom’s Taxonomy Level |
 |----------|----------------------------------|----------|------------------------|
 | CLO_1 | Understand core fundamentals of AI such as intelligent agents, environments, and knowledge representation. | GA2 (Knowledge for Solving Computing Problems) | C1 – Remembering |
 | CLO_2 | Apply AI techniques such as state-based, variable-based, and logical approaches for problem solving. | GA3 (Problem Analysis) | C3 – Applying |
